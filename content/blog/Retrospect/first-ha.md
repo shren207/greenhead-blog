@@ -1,5 +1,5 @@
 ---
-title: 코드스테이츠 섹션1 HA 회고
+title: 코드스테이츠 섹션1 기수이동 회고
 date: 2021-08-21 13:03:02
 category: retrospect
 thumbnail: { thumbnailSrc }

@@ -1,0 +1,211 @@
+---
+title: '[JS] 문자열'
+date: 2021-07-22 21:33:29
+category: til
+thumbnail: { thumbnailSrc }
+draft: false
+img: false
+---
+
+# ▶️ 문자열 (String)
+
+## 문자열 생성 방법
+
+```jsx
+(1) let str1 = "hello"
+(2) let str2 = new String("hello")
+
+typeof str1 // '**string**'
+typeof str2 // '**object**' <= array-like object (index, length 프로퍼티 존재)
+
+console.log(str2) /* {
+	0: 'h'
+	1: 'e'
+	2: 'l'
+	3: 'l'
+	4: 'o'
+	**length**: 5
+}
+```
+
+두가지 선언방법의 차이는 자료형이 다르다는 것 외에 큰 차이는 없다. 그래서 ( **1** )의 방식으로 문자열을 선언해도 ( **2** )와 마찬가지로 `str1[index]`, `str1.length`를 사용할 수 있다. 보통은 더 간단한 ( **1** )의 방식으로 문자열을 선언하게 된다.
+
+## Templete Literal
+
+### 기본적인 사용법
+
+template literal은 문자열 안에 표현식을 나타낼수 있게 해주는 기능이다.
+
+(1) 변수
+
+```jsx
+const myName = 'Nokdoo'
+const friendName = 'Hira'
+
+const sayHi = 'hello, ' + friendName + ', my name is ' + myName
+const sayHello = `hello, ${friendName}, my name is ${myName}`
+
+consolo.log(sayHi === sayHello) // true
+```
+
+(2) 연산자
+
+```jsx
+console.log(`1 + 1 = ${1 + 1}`) // 1 + 1 = 2
+```
+
+(3) 함수
+
+```jsx
+const add = (a, b) => a + b
+
+console.log(`1 + 1 = ${add(1, 1)}`) // 1 + 1 = 2
+```
+
+template liteal은 작은따옴표(''), 큰따옴표("")와 달리 **줄바꿈을 지원**하기에 아래처럼도 가능하다.
+![](https://www.notion.so/image/https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2F50337817-ba62-4b26-b2f0-01f8102ba038%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2021-09-13_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_3.19.45.png?table=block&id=0e04ad30-0f38-48d6-ad3e-c98452368ddf&spaceId=afdce364-b2e1-4547-8282-c4a28b754ef8&width=2000&userId=60efd79d-1828-4612-87a4-223e97e23bee&cache=v2)
+
+### JS 안에서 HTML 작성 (literal 활용)
+
+```html
+<body>
+  <div class="hello">
+    <h1 class="title">
+      hello
+    </h1>
+  </div>
+</body>
+```
+
+위와 같은 HTML을 JS를 통해 작성할 때 template를 사용하지 않으면 아래처럼 길고 복잡한 코드를 써야 한다.
+
+```jsx
+const body = document.body
+
+const addWelcome = () => {
+  const div = document.createElement('div')
+  div.setAttribute('class', 'hello')
+  const h1 = document.createElement('h1')
+  h1.setAttribute('class', 'title')
+  h1.innerText = 'hello'
+  div.append(h1)
+  body.append(div)
+}
+
+addWelcome()
+```
+
+위와는 다르게 template literal을 사용하면 아래처럼 코드를 보다 간단하고, 예쁘게 만들어 줄 수 있다.
+
+```jsx
+const body = document.body
+
+const addWelcome = () => {
+  const div = `
+		<div class="hello">
+			<h1 class="title">Hello</h1>
+		</div>
+	`
+  body.innerHTML = div
+}
+
+addWelcome()
+```
+
+### JS 안에서 HTML 작성 (literal 활용) [arr.map()]
+
+사진과 같은 HTML 내용이 출력되도록 JS를 작성해보자.
+
+```jsx
+const body = document.body
+const friends = ['me', 'hira', 'gosegu', 'vichan']
+const h1 = document.createElement('h1')
+h1.innerText = 'People I love'
+body.append(h1)
+
+const ul = document.createElement('ul')
+friends.forEach(friend => {
+  const li = document.createElement('li')
+  li.innerText = friend
+  ul.append(li)
+})
+
+body.append(ul)
+```
+
+`createElement`, `innerText`, `append`... 코드가 너무 난잡해지고 길어진다.
+이 또한 template literal을 작성하면 보기 깔끔해지고 더 적게 작성할 수 있다.
+
+```jsx
+const body = document.body
+
+const friends = ['me', 'hira', 'gosegu', 'vichan']
+const list = `
+    <h1>People I love</h1>
+    <ul>
+        ${friends.map(friend => `<li>${friend}</li>`).join('')}
+    <ul>
+`
+body.innerHTML = list
+```
+
+### Tagged Templates (함수를 호출하는 또다른 방법)
+
+tagged templates는 소괄호 대신 template literal을 사용하여 함수를 호출하는 또다른 방법이다.
+**첫번째 인자**는 문자열로 이루어진 배열이며, **두번째 인자부터**는 \${ }로 감싸준 표현식을 나타낸다.
+
+```jsx
+const myName = 'nokdoo'
+const age = 13
+
+const introduce = (string, ...expression) => {
+  console.log(Array.isArray(string)) // true
+  const str1 = string[0] // 'my name is '
+  const str2 = string[1] // ' and i'm '
+  const str3 = string[2] // ' years old.'
+  const myName = expression[0] // 'nokdoo'
+  const age = expression[1] // 13
+
+  return str1 + myName + str2 + age + str3
+  // "my name is nokdoo and i'm 13 years old."
+}
+introduce`my name is ${myName} and i'm ${age} years old.`
+```
+
+### Cloning Styled Components
+
+Styled Components란 CSS를 손쉽게 JS에 삽입하게 해 주는 React 라이브러리이다.
+매우 널리 사용되고 있는 라이브러리이므로 추후 반드시 배우게 될 것이다.
+
+[[React] Styled Components 사용법](https://www.daleseo.com/react-styled-components/)
+
+여기서는 Styled Components를 template literal를 이용해서 clone을 해 볼 것이다.
+아래 이미지를 Styled Components를 사용하여 만들어보자.
+
+![스크린샷 2021-09-13 오후 8.06.13.png](https://www.notion.so/image/https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2F30b3876f-ecd4-4c17-a8c7-062b7fa0f12a%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2021-09-13_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_8.06.13.png?table=block&id=9a3ca6ed-6ae4-4845-9b47-07a4139ef1de&spaceId=afdce364-b2e1-4547-8282-c4a28b754ef8&width=2000&userId=60efd79d-1828-4612-87a4-223e97e23bee&cache=v2)
+
+```jsx
+const styled = aElement => {
+  const el = document.createElement(aElement)
+  return args => {
+    // args는 문자열을 요소로 갖는 **배열**
+    const styles = args[0]
+    el.style = styles
+    return el
+  }
+}
+
+const title = styled('h1')`
+  background-color: red;
+  color: blue;
+`
+
+const subtitle = styled('span')`
+  color: green;
+`
+
+title.innerText = 'we just cloned'
+subtitle.innerText = 'Styled Components'
+
+document.body.append(title, subtitle)
+```

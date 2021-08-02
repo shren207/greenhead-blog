@@ -1,11 +1,13 @@
 ---
 title: 코드스테이츠 2주차 회고
-date: 2021-08-01 15:03:29
+date: 2021-08-01 15:42:03
 category: retrospect
 thumbnail: { thumbnailSrc }
 draft: false
 img: false
 ---
+
+![](https://images.velog.io/images/shren/post/479f645a-f2ee-41ed-a510-13eeaccc64a5/%E1%84%92%E1%85%AC%E1%84%80%E1%85%A9.gif)
 
 > _**2021.08.01. 코드를 누비다**_
 

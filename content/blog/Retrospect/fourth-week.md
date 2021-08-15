@@ -1,6 +1,6 @@
 ---
 title: 코드스테이츠 4주차 회고
-date: 2021-08-15 12:03:95
+date: 2021-08-15 12:03:45
 category: retrospect
 thumbnail: { thumbnailSrc }
 draft: false

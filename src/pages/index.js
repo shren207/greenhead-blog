@@ -64,6 +64,7 @@ export default ({ data, location }) => {
 }
 //todo: 개별 포스트의 frontmatter는 여기서 수정한다.
 //todo: allMarkdonwRemark의 frontmatter부분을 수정하면 된다.
+//todo: 여기서만 query를 작성하면 오류가 나기때문에 blog md 파일도 query를 명시해야 한다.
 
 export const pageQuery = graphql`
   query {
@@ -91,6 +92,7 @@ export const pageQuery = graphql`
             category
             draft
             description
+            img
           }
         }
       }

@@ -2,12 +2,18 @@
 
 .thumbnail {
   display: block;
+  margin-top: 10px;
   margin-bottom: 12px;
   padding: 4px;
   padding-bottom: 12px;
   box-shadow: none;
   transition: text-shadow 0.3s, opacity 0.4s;
   opacity: 0;
+
+  .container {
+    display: flex;
+    justify-content: space-between;
+  }
 
   .tag {
     margin-right: 10px;
@@ -25,13 +31,25 @@
   }
   h3 {
     margin-top: 6px;
-    font-size: 28px;
+    font-size: 25px;
   }
 
   p {
-    font-size: 90%;
     line-height: 1.4;
   }
+
+  img {
+    width: 80px;
+    height: 80px;
+    border-radius: 7px;
+    margin-left: 15px;
+    margin-top: 12px;
+    transition: all 0.3s;
+  }
+}
+.thumbnail:hover img {
+  transform: scale(1.15);
+  transition: 0.3s;
 }
 
 .thumbnail.visible {

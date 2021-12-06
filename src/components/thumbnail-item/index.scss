@@ -9,6 +9,25 @@
   transition: text-shadow 0.3s, opacity 0.4s;
   opacity: 0;
 
+  .tag {
+    margin-right: 10px;
+    font-size: 11px;
+    background: #ffaba1;
+    padding: 1px 7px;
+    font-weight: 700;
+    border-radius: 8px;
+    text-transform: uppercase;
+    color: black;
+  }
+  .date {
+    font-size: 13px;
+    opacity: 0.9;
+  }
+  h3 {
+    margin-top: 6px;
+    font-size: 28px;
+  }
+
   p {
     font-size: 90%;
     line-height: 1.4;

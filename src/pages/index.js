@@ -62,6 +62,8 @@ export default ({ data, location }) => {
     </Layout>
   )
 }
+//todo: 개별 포스트의 frontmatter는 여기서 수정한다.
+//todo: allMarkdonwRemark의 frontmatter부분을 수정하면 된다.
 
 export const pageQuery = graphql`
   query {
@@ -84,10 +86,11 @@ export const pageQuery = graphql`
             slug
           }
           frontmatter {
-            date(formatString: "MMMM DD, YYYY")
+            date(formatString: "YYYY-MM-DD")
             title
             category
             draft
+            description
           }
         }
       }

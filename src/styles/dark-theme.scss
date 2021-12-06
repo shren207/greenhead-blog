@@ -45,7 +45,8 @@ body.dark {
   }
 
   .thumbnail {
-    h3 {
+    h3,
+    span.date {
       color: $dark-light-font-color;
     }
     p {

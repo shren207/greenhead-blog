@@ -44,7 +44,8 @@ body.light {
   }
 
   .thumbnail {
-    h3 {
+    h3,
+    span.date {
       color: $dark-gray;
     }
     p {

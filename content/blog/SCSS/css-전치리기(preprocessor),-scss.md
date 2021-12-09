@@ -3,7 +3,7 @@ title: CSS 전치리기(Preprocessor), SCSS
 date: 2021-12-09 19:12:67
 category: SCSS
 thumbnail: { thumbnailSrc }
-description: 프로그래밍 방법론을 도입한 CSS 전처리기인 SCSS를 간단히 알아보자
+description: 프로그래밍 방법론을 도입한 CSS 전처리기인 SCSS를 간단히 알아보자!
 draft: false
 img: true
 ---

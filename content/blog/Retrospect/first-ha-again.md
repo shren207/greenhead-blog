@@ -1,5 +1,5 @@
 ---
-title: 코드스테이츠 섹션1 HA 통과
+title: 코드스테이츠 섹션1 회고
 date: 2021-09-30 16:42:51
 category: development
 thumbnail: { thumbnailSrc }

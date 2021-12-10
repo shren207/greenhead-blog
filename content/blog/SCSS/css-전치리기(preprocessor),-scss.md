@@ -1,9 +1,9 @@
 ---
-title: CSS 전치리기(Preprocessor), SCSS
+title: CSS 전치리기(Preprocessor), Sass
 date: 2021-12-09 19:12:67
-category: SCSS
+category: Sass
 thumbnail: { thumbnailSrc }
-description: 프로그래밍 방법론을 도입한 CSS 전처리기인 SCSS를 간단히 알아보자!
+description: 프로그래밍 방법론을 도입한 CSS 전처리기인 Sass를 간단히 알아보자!
 draft: false
 img: true
 ---
@@ -20,36 +20,24 @@ img: true
 
 따라서 Sass에 대한 아주 아주 기본적인 내용만 다뤘으며 추후 내용을 추가할 수도 있다.
 
-## Parcel을 통한 SCSS(Sass) 컴파일
+## CRA에서 Sass 사용
 
 Sass는 웹에서 직접 동작할 수 없기 때문에 전처리기로 작성 후 CSS로 컴파일해야 한다.
 
-많은 방법이 있지만 `Parcel` 을 이용하는게 가장 간단했으므로 이 방법만 여기에 기록한다.
+`CRA(create-react-app)` 을 이용하는 경우, 간단하게 Sass를 사용할 수 있다.
 
 ---
 
-1️⃣ Parcel을 전역으로 설치한다.
+1️⃣ create-react-app이 설치된 프로젝트 폴더에서 sass를 설치한다.
 
 ```bash
-npm i -g parcel-bundler
+npm i sass
 ```
 
-2️⃣ 프로젝트 폴더에 가서 Sass를 설치한다.
+2️⃣ 이후 각각의 js파일에 대응되는 scss파일을 import하면 끝이다.
 
-```bash
-npm i --save-dev sass
-```
-
-3️⃣ HTML 파일에서 `<link>` 로 Sass파일을 연결한다.
-
-```html
-<link rel="stylesheet" href="style.css" />
-```
-
-4️⃣ parcel로 컴파일한다.
-
-```bash
-parcel index.html
+```jsx
+import `./src/style.scss`
 ```
 
 ## 중첩

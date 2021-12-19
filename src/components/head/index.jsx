@@ -6,7 +6,7 @@ import { StaticQuery, graphql } from 'gatsby'
 //* Helmet 컴포넌트의 meta props으로 전달해 주었다.
 
 export function Head({ description, lang, meta, keywords, title }) {
-  const googleSiteVerification = `<meta name="google-site-verification" content="BP25-HVmSorHNnOqPF62oesQKoFnc2zqsqAfXp4Vnlw" />`
+  const googleSiteVerification = `BP25-HVmSorHNnOqPF62oesQKoFnc2zqsqAfXp4Vnlw`
   return (
     <StaticQuery
       query={detailsQuery}

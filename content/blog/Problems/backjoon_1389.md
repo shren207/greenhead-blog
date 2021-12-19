@@ -3,9 +3,9 @@ title: '[백준 1389] 케빈 베이컨의 6가지 법칙'
 date: 2021-12-19 23:12:09
 category: Problems
 thumbnail: { thumbnailSrc }
-description:
+description: 그래프 문제를 풀 땐 DFS, BFS 어느것을 쓸 지 정확히 판단해야 한다!
 draft: false
-img: false
+img: true
 ---
 
 [![backjoon](./img/backjoon.png)](https://www.acmicpc.net/problem/1389)

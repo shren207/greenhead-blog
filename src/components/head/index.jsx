@@ -2,8 +2,11 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Helmet from 'react-helmet'
 import { StaticQuery, graphql } from 'gatsby'
+//* google search engine을 등록하기 위해 googleSiteVerification 변수를 만들고
+//* Helmet 컴포넌트의 meta props으로 전달해 주었다.
 
 export function Head({ description, lang, meta, keywords, title }) {
+  const googleSiteVerification = `<meta name="google-site-verification" content="BP25-HVmSorHNnOqPF62oesQKoFnc2zqsqAfXp4Vnlw" />`
   return (
     <StaticQuery
       query={detailsQuery}
@@ -49,6 +52,10 @@ export function Head({ description, lang, meta, keywords, title }) {
               {
                 name: `twitter:description`,
                 content: metaDescription,
+              },
+              {
+                name: `google-site-verification`,
+                content: googleSiteVerification,
               },
             ]
               .concat(

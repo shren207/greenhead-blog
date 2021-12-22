@@ -18,7 +18,7 @@
   .tag {
     margin-right: 10px;
     font-size: 11px;
-    background: #ffaba1;
+    background: yellowgreen;
     padding: 1px 7px;
     font-weight: 700;
     border-radius: 8px;
@@ -39,11 +39,11 @@
   }
 
   img {
-    width: 80px;
-    height: 80px;
+    width: 90px; // 80 -> 90
+    height: 90px; // 80 -> 90
     border-radius: 7px;
     margin-left: 15px;
-    margin-top: 15px; // 큐트리 님의 경우는 30px로 설정하셨음!
+    margin-top: 30px; // 큐트리 님의 경우는 30px로 설정하셨음! (이미지 위아래 크기)
     transition: all 0.3s;
   }
 }

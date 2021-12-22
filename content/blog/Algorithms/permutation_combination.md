@@ -1,9 +1,8 @@
 ---
 title: 순열과 조합 알고리즘
 date: 2021-12-16 15:12:90
-category: algorithms
+category: Algorithms
 thumbnail: { thumbnailSrc }
-description: 순열과 조합을 구현하는 알고리즘을 간단히 알아보자.
 draft: false
 img: true
 ---

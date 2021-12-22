@@ -3,14 +3,13 @@ title: 편리한 REST API 테스트 도구, REST Client
 date: 2021-12-10 19:12:29
 category: REST Client
 thumbnail: { thumbnailSrc }
-description: Postman보다 훨씬 쓰기 편한 REST Client를 알아보자.
 draft: false
 img: true
 ---
 
 ![rest-client](./img/rest-client.png)
 
-흔히들 쓰는 `Postman` 은 간단히 쓸 수 있는 API 테스트 툴이지만 몇가지 문제점이 있다.
+흔히들 쓰는 **Postman** 은 간단히 쓸 수 있는 API 테스트 툴이지만 몇가지 문제점이 있다.
 
 1. 요청의 저장이 불편하며, 저장해도 날라가는 경우가 종종 있다.
 2. 반복되는 endpoint를 일일이 다 써줘야 한다.

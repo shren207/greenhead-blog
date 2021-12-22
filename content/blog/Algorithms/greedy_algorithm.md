@@ -3,7 +3,6 @@ title: 그리디 알고리즘이란?
 date: 2021-12-15 20:12:11
 category: Algorithms
 thumbnail: { thumbnailSrc }
-description: 눈 앞의 이익만을 좇는, 숲이 아닌 나무만 보는 그리디 알고리즘을 알아보자.
 draft: false
 img: true
 ---

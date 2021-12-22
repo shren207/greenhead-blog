@@ -48,12 +48,16 @@ body.dark {
     h3,
     span.date {
       color: $dark-light-font-color;
+      transition: 0.3s;
     }
     p {
       color: $dark-middle-font-color;
     }
     &:hover {
-      text-shadow: $dark-hover-text-shadow;
+      // text-shadow: $dark-hover-text-shadow;
+      h3 {
+        color: yellowgreen;
+      }
     }
   }
 

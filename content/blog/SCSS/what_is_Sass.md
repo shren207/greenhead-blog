@@ -10,7 +10,7 @@ img: true
 
 ![Sass](./img/sass.png)
 
-`Sass` 는 CSS가 동작하기 전에 사용되는 전처리기(Preprocessor)로, 셀렉터의 중첩(Nesting)이나 조건문, 반복문 등과 같은 프로그래밍 언어에서 다룰법한 기능을 가능케 한다.
+**Sass** 는 CSS가 동작하기 전에 사용되는 전처리기(Preprocessor)로, 셀렉터의 중첩(Nesting)이나 조건문, 반복문 등과 같은 프로그래밍 언어에서 다룰법한 기능을 가능케 한다.
 
 참고로 `SCSS` 는 CSS 구문과 완전히 호환되도록 새로운 문법을 도입하였지만 그러면서도 기존 Sass의 모든 기능을 지원하는 CSS의 **Superset**이다.
 

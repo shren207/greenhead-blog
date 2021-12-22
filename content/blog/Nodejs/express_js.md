@@ -3,7 +3,6 @@ title: '[Node.js] 서버 제작을 위해 쓰이는 Express'
 date: 2021-12-22 13:12:67
 category: Nodejs
 thumbnail: { thumbnailSrc }
-description: Node.js 환경에서 웹 서버 또는 API 서버를 제작하기 위해 사용되는 프레임워크, Express.js를 알아보자.
 draft: false
 img: true
 ---

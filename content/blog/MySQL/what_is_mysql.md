@@ -3,7 +3,6 @@ title: 관계형 DB의 대표격인 MySQL
 date: 2021-12-17 22:12:91
 category: MySQL
 thumbnail: { thumbnailSrc }
-description: SQL을 배워서 MySQL로 Schema를 작성해보자.
 draft: true
 img: true
 ---

@@ -19,6 +19,7 @@ import '../styles/code.scss'
 import 'katex/dist/katex.min.css'
 
 export default ({ data, pageContext, location }) => {
+  console.log(pageContext)
   useEffect(() => {
     ScrollManager.init()
     return () => ScrollManager.destroy()
@@ -26,7 +27,7 @@ export default ({ data, pageContext, location }) => {
 
   const post = data.markdownRemark
   const metaData = data.site.siteMetadata
-  const { title, comment, siteUrl, author, sponsor } = metaData
+  const { title, comment, siteUrl } = metaData
   const { disqusShortName, utterances } = comment
   const { title: postTitle, date } = post.frontmatter
 

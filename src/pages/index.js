@@ -65,7 +65,7 @@ export default ({ data, location }) => {
 //todo: 개별 포스트의 frontmatter는 여기서 수정한다.
 //todo: allMarkdonwRemark의 frontmatter부분을 수정하면 된다.
 //todo: 여기서만 query를 작성하면 오류가 나기때문에 blog md 파일도 query를 명시해야 한다.
-//수정한 query: data(년-월-일), excerpt(prunLength: 200 -> 87) // 미리보기 글자 수
+//수정한 query: data(년-월-일), excerpt(prunLength: 200 -> 90) // 미리보기 글자 수
 //새로 만든 query: img (description은 navigator가 안보이는 에러가 있어 삭제함)
 
 export const pageQuery = graphql`
@@ -84,7 +84,7 @@ export const pageQuery = graphql`
     ) {
       edges {
         node {
-          excerpt(pruneLength: 87, truncate: true)
+          excerpt(pruneLength: 90, truncate: true)
           fields {
             slug
           }

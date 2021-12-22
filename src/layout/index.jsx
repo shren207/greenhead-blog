@@ -18,7 +18,7 @@ export const Layout = ({ location, title, children }) => {
         style={{
           marginLeft: `auto`,
           marginRight: `auto`,
-          maxWidth: rhythm(25), // 기본값은 24, Gparkkii.io의 포스트 폭은 29
+          maxWidth: rhythm(27), // 기본값은 24, Gparkkii.io의 포스트 폭은 29
           padding: `${rhythm(1.5)} ${rhythm(3 / 4)}`,
         }}
       >

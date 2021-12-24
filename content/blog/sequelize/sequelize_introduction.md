@@ -225,7 +225,7 @@ npx sequelize-cli model:generate --name Url --attributes url:string,title:string
 'use strict'
 const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  class Url extends Model {
+  class url extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -235,7 +235,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  Url.init(
+  url.init(
     // 각 필드의 요구사항이 명시되어 있음
     {
       url: DataTypes.STRING,
@@ -244,10 +244,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: 'Url',
+      modelName: 'url',
     }
   )
-  return Url
+  return url
 }
 ```
 
@@ -265,10 +265,11 @@ visits: {type: DataTypes.INTEGER, defaultValue: 0}
 
 ### controller/links/index.js
 
-이번 과제에서 가장 작성이 어려웠던 부분인데 찬찬히 살펴보겠습니다.
+이번 과제에서 가장 작성이 어려웠던 파일인데 천천히 살펴보겠습니다.
 
 ```js
 const { url } = require('../../models/')
+// const { url } = require('../../models/index.js') 도 같이 동작합니다.
 // 경로를 이렇게 설정하면 각 모델을 속성으로 갖는 객체를 불러옵니다.
 // 저희는 url 모델이 필요하니 구조분해 할당으로 불러옵니다.
 // 이렇게 불러오면 저희는 url 테이블을 조작할 수 있습니다.
@@ -278,7 +279,7 @@ const { url } = require('../../models/')
 // const url = require('../../models/url.js')
 
 const { isValidUrl, getUrlTitle } = require('../../modules/utils.js')
-// 주어진 url이 유효성을 검사하는 함수와 urlTitle을 반환하는 함수를 불러옵니다.
+// 주어진 url의 유효성을 검사하는 함수와 urlTitle을 반환하는 함수를 불러옵니다.
 
 // 아래에서는 본격적으로 sequelize 메서드를 사용합니다.
 // 여기서는 findAll(), findOrCreate(), findOne(), update()를 다룹니다.

@@ -1,5 +1,5 @@
 ---
-title: 순열과 조합 알고리즘
+title: '순열과 조합 알고리즘'
 date: 2021-12-16 15:12:90
 category: Algorithms
 thumbnail: { thumbnailSrc }

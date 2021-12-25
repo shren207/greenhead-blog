@@ -13,22 +13,47 @@ img: true
 
 위의 사진을 예로 들자면, 배열 `[-2, -3, 4, -1, -2, 1, 5, -3]` 의 LSCS는 **7**입니다.
 
-이 문제를 브루트포스 알고리즘으로 풀이할 시, 시간복잡도는 무려 **O(2<sup>n</sup>)**입니다. 멱집합을 구현할 때 자주 사용되는 방식인 `pickOrNot` 으로 구현해 보았습니다.
+## 브루트포스 : O(2<sup>N</sup>)
+
+로직은 멱집합을 구할 때 쓰는 `pickOrNot`에서 상당 부분 영감을 받았습니다.
 
 ```js
-let candidate = [] // 정답 후보군이 들어갈 배열
-let arr = [-2, -3, 4, -1, -2, 1, 5, -3]
-const LSCS = (sum, idx) => {
-  // base case: 배열의 끝인 경우
-  if (idx === arr.length) return
+const LSCS = arr => {
+  N = arr.length
+  const findByBruteForce = (idx, sum) => {
+    if (idx === N) return Number.MIN_SAFE_INTEGER
 
-  // recursive case : pickOrNot
-  candidate.push(sum) // 현재까지의 부분합을 후보 배열에 삽입합니다.
-  LSCS(sum + arr[idx], idx + 1) // 1️⃣ keep continuing
-  LSCS(0, idx + 1) // 2️⃣ disconnected and recontinue
+    let answer = Math.max(
+      arr[idx], // 1️⃣ 이전값을 버린 현재값
+      arr[idx] + sum, // 2️⃣ 이전값과 현재값의 합
+      findByBruteForce(idx + 1, arr[idx]), // 1️⃣ 의 값으로 재귀 호출
+      findByBruteForce(idx + 1, arr[idx] + sum) // 2️⃣ 의 값으로 재귀 호출
+    )
+    return answer
+  }
+  findByBruteForce(0, 0)
 }
-LSCS(0, 0)
-candidate.length // 255 (2^7 - 1)
 ```
 
-> 배열 arr의 요소는 7개이며, 배열 candidate의 길이는 2<sup>7</sup>-1
+재귀함수 `find` 는 함수 내에서 자기 자신을 2회 호출 합니다. 주어진 배열의 길이 N의 크기가 커질수록 총 호출 횟수가 2배씩 커지기에 시간복잡도는 **O(2<sup>n</sup>)** 입니다.
+
+## Dynamic Programming : O(N)
+
+[geeksforgeeks](https://www.geeksforgeeks.org/largest-sum-contiguous-subarray/?ref=gcse)
+의 코드를 참고하였습니다.
+
+```js
+function maxSubArraySum(arr) {
+  let N = arr.length
+  let maxEndingHere = 0 // 선발대.
+  let maxSoFar = Number.MIN_SAFE_INTEGER // 정답 후보를 저장
+
+  for (let i = 0; i < N; i++) {
+    maxEndingHere = maxEndingHere + arr[i]
+    if (maxSoFar < maxEndingHere) maxSoFar = maxEndingHere
+
+    if (maxEndingHere < 0) maxEndingHere = 0
+  }
+  return maxSoFar
+}
+```

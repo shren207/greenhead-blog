@@ -15,7 +15,6 @@ export const ThumbnailItem = ({ node }) => {
           <span className={`date`}>{node.frontmatter.date}</span>
           <h3>{node.frontmatter.title || node.fields.slug}</h3>
           <p dangerouslySetInnerHTML={{ __html: node.excerpt }} />
-          {/* 만약 미리보기를 없애고 본문의 내용중 일부를 보이게 하고 싶다면(기본값), 위 주석을 해제하고 아래 코드를 주석처리하자 */}
         </div>
         {node.frontmatter.img ? (
           <img

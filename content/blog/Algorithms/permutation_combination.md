@@ -100,7 +100,7 @@ function permutation(n) {
       // splice 메서드는 mutable하므로 얕은 복사를 구현한다.
       let choice = clone.splice(i, 1)
       // 인덱스 i에 해당하는 숫자는 현재 단계에서 사용했으므로 제거한다.
-      dfs(clone, [...bucket, choice])
+      dfs(cnt - 1, [...bucket, choice], clone)
     }
   }
   dfs()

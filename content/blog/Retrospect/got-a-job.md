@@ -3,7 +3,7 @@ title: 첫 입사를 앞두고..
 date: 2022-04-30 22:04:50
 category: retrospect
 thumbnail: { thumbnailSrc }
-draft: false
+draft: true
 img: false
 ---
 

@@ -1,5 +1,5 @@
 ---
-title: binaryHeap
+title: 이진힙에 대해 알아보자
 date: 2022-01-14 14:01:39
 category: algorithms
 thumbnail: { thumbnailSrc }

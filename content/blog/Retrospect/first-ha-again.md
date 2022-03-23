@@ -1,7 +1,7 @@
 ---
 title: 코드스테이츠 섹션1 회고
 date: 2021-09-30 16:42:51
-category: development
+category: retrospect
 thumbnail: { thumbnailSrc }
 draft: false
 img: false

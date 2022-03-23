@@ -4,7 +4,7 @@ date: 2022-01-20 21:01:73
 category: GIT
 thumbnail: { thumbnailSrc }
 draft: false
-img: true
+img: false
 ---
 
 ## 현재 git의 전체적인 상태를 알고 싶을 때

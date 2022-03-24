@@ -1,5 +1,5 @@
 ---
-title: GIT
+title: '[GIT] 브랜치'
 date: 2022-01-20 21:01:73
 category: GIT
 thumbnail: { thumbnailSrc }

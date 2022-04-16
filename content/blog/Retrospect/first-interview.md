@@ -1,6 +1,6 @@
 ---
 title: 4월 13일 기술면접 후기
-date: 2022-04-15 21:04:13
+date: 2022-04-14 10:04:13
 category: retrospect
 thumbnail: { thumbnailSrc }
 draft: false

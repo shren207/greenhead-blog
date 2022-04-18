@@ -1,7 +1,7 @@
 ---
 title: 편리한 REST API 테스트 도구, REST Client
 date: 2021-12-10 19:12:29
-category: REST Client
+category: development
 thumbnail: { thumbnailSrc }
 draft: false
 img: true

@@ -1,7 +1,7 @@
 ---
 title: 관계형 DB의 대표격인 MySQL
 date: 2021-12-17 22:12:91
-category: MySQL
+category: development
 thumbnail: { thumbnailSrc }
 draft: true
 img: true

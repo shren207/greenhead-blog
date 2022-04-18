@@ -65,3 +65,7 @@ img: boolean
 ### 네비게이터 이슈
 
 네비게이터가 작동하지 않는 이유를 알았다. netlify의 NODE_VERSION을 나는 v14.18.2로 해 놨었는데, 그냥14라고 하니까 고칠 수 있었다.
+
+### npm run post 할때 포스트 default 값 설정하는 법
+
+node_modules/gatsby-post-gen/lib/index.js 파일에서 contents 변수를 수정하면 된다.

@@ -1,7 +1,7 @@
 ---
 title: CSS 전치리기(Preprocessor), Sass
 date: 2021-12-09 19:12:67
-category: Sass
+category: development
 thumbnail: { thumbnailSrc }
 draft: false
 img: true

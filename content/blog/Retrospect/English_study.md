@@ -1,7 +1,7 @@
 ---
 title: 본격적인 영어 공부를 결심하다.
 date: 2021-12-08 20:12:60
-category: English
+category: retrospect
 thumbnail: { thumbnailSrc }
 draft: false
 img: true

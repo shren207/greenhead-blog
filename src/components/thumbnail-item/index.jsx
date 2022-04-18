@@ -16,12 +16,12 @@ export const ThumbnailItem = ({ node }) => {
           <h3>{node.frontmatter.title || node.fields.slug}</h3>
           <p dangerouslySetInnerHTML={{ __html: node.excerpt }} />
         </div>
-        {node.frontmatter.img ? (
+        {/* {node.frontmatter.img ? (
           <img
             src={require(`./images/${node.frontmatter.category.toLowerCase()}.png`)}
             alt="HTML"
           />
-        ) : null}
+        ) : null} */}
       </div>
     </Link>
   )

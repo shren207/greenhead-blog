@@ -139,6 +139,7 @@ const Mole = (props: MoleProps) => {
 ### 조건부 useEffect
 
 [리액트 useEffect: 개발자가 알아야 할 네가지 팁](https://ui.toast.com/weekly-pick/ko_20200916)
+[useEffect 사용법](https://xiubindev.tistory.com/100)
 
 ### React에서 setTimeout쓰는 법
 

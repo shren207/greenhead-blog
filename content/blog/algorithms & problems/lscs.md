@@ -1,7 +1,7 @@
 ---
 title: 'LSCS(Largest Sum of Contiguous Subarray)'
 date: 2021-12-24 23:12:06
-category: Algorithms
+category: algorithms & problems
 thumbnail: { thumbnailSrc }
 draft: false
 img: true

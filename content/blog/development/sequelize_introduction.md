@@ -1,5 +1,5 @@
 ---
-title: 쿼리문 없이 객체지향적 코드로 DB 관리!
+title: Sequelize 이해 및 실습
 date: 2021-12-23 22:12:80
 category: development
 thumbnail: { thumbnailSrc }

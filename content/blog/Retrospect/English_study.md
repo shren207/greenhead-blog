@@ -4,7 +4,7 @@ date: 2021-12-08 20:12:60
 category: retrospect
 thumbnail: { thumbnailSrc }
 draft: false
-img: true
+img: false
 ---
 
 나는 학창시절 때도 영어를 잘 하는 편은 아니었고 지금도 그렇다.  

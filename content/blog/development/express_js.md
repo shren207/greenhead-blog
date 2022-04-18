@@ -1,5 +1,5 @@
 ---
-title: '[Node.js] 서버 제작을 위해 쓰이는 Express'
+title: 'Express.js 개념 정리'
 date: 2021-12-22 13:12:67
 category: development
 thumbnail: { thumbnailSrc }

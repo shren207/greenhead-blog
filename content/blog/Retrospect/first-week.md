@@ -1,7 +1,7 @@
 ---
 title: 코드스테이츠 1주차 회고
 date: 2021-07-25 15:03:13
-category: Retrospect
+category: retrospect
 thumbnail: { thumbnailSrc }
 draft: false
 img: false

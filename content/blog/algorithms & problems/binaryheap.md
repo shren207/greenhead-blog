@@ -1,7 +1,7 @@
 ---
 title: 이진힙에 대해 알아보자
 date: 2022-01-14 14:01:39
-category: Algorithms
+category: algorithms & problems
 thumbnail: { thumbnailSrc }
 draft: false
 img: true

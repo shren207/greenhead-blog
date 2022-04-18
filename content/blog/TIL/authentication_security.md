@@ -1,7 +1,7 @@
 ---
 title: '[TIL] HTTPS, 해싱, 쿠키, 세션 (수정필요)'
 date: 2021-12-27 23:12:12
-category: TIL
+category: til
 thumbnail: { thumbnailSrc }
 draft: false
 img: false

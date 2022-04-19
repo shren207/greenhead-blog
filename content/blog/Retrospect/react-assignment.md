@@ -143,8 +143,8 @@ const Mole = (props: MoleProps) => {
 
 ### React에서 setTimeout쓰는 법
 
-setTimeout에서 지정한 함수가 2번 이상 실행될 수 있었기 때문에 2초 내에 두더지를 클릭하더라도 Invalid가 되었다.
-매 시간마다 setTimeout은 항상 1번만 실행되도록 할 필요가 있었기에 관련 링크를 찾아보았다.
+`setTimeout`에서 지정한 함수가 2번 이상 실행될 수 있었기 때문에 2초 내에 두더지를 클릭하더라도 Invalid가 되었다.
+<u>매 시간마다 setTimeout은 **딱 1번만 실행**되도록(**쓰로틀링**)</u> 할 필요가 있었기에 관련 링크를 찾아보았다.
 
 [JS setTimeout, clearTimeout 질문이요 (okky)](https://okky.kr/article/877205?note=2247045)
 

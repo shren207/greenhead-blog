@@ -311,3 +311,175 @@ module.exports = {
 사진처럼 <u>**static 폴더 자체를 제외한 그 내용물**이 copy되서 dist 폴더에 생성</u>된 것을 알 수 있다. 여기서는 `index.html` 주변에 `images` 폴더가 있기 때문에 `<img src="./images/logo.png" alt="logo" />`로 작성한 것이다.
 
 <img width="202" alt="result" src="https://user-images.githubusercontent.com/85833148/164008248-7e2ab759-a4f6-4003-9526-336e3c834144.png">
+
+## module
+
+이번에는 프로젝트에 style을 적용해보자.
+
+<u>루트 디렉토리의 `index.html`에 직접 link 태그를 명시하는 방법</u>과, <u>`webpack.config.js`에서 `module` 속성을 명시해서 빌드 시 index.html에 style 태그를 자동으로 넣어주는 방법</u>이 있다.
+
+### 직접 link 태그 명시
+
+`static` 폴더 내부에 `css` 폴더를 만들고, 그 안에 `style.css` 파일을 만든다.
+
+<img width="198" alt="link" src="https://user-images.githubusercontent.com/85833148/164049164-5df31614-f9ea-49c9-93d0-9d1ae66e801a.png">
+
+이후 루트 디렉토리의 index.html을 다음과 같이 작성한다.
+
+css파일 경로를 `./static/css/style.css`로 작성하지 않는 이유는, `plugin` 속성에 명시된 `new HtmlPlugin`의 `template` 속성에 명시된 `index.html` 파일 내에서 경로를 설정하는 경우는, `root`에 있는 `index.html`이 아닌, `output`속성의 `path`에 명시된 경로에 있는 `index.html`을 기준으로 상대 경로를 작성해야 하기 때문이다.
+
+```html
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hello Webpack!</title>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+```
+
+터미널에 `npm run dev` 입력 후 페이지를 확인하면 정상적으로 `css`가 적용된 것을 확인할 수 있다.
+
+### module 속성을 사용해서 style 태그 적용
+
+우선 `static` 폴더에 넣었던 `css` 폴더를 root로 이동시킨다.
+
+<img width="198" alt="style" src="https://user-images.githubusercontent.com/85833148/164051168-890c57d9-f8e2-4aeb-98ea-493344441532.png">
+
+그리고 entry 속성에 명시된 main.js은 다음과 같이 css 파일을 import 해준다.
+
+```js
+// main.js
+import '../css/style.css'
+// index.html과는 달리 dist의 main.js가 아닌, entry 속성의 경로를 기준으로 상대 경로를 작성
+
+console.log('Webpack!')
+```
+
+webpack 자체로는 css 파일을 읽을 수 없다. 단지 그것을 합쳐서 dist 폴더로 보내는 역할만 수행한다.
+
+그렇기에 css파일을 읽을 수 있는 외부 패키지, `css-loader`, `style-loader`를 설치해야 한다.
+
+```bash
+npm i -D css-loader style-loader
+```
+
+- `css-loader` : JS에서 css 파일을 해석하게 해주는 패키지
+- `style-loader` : 해석된 css를 html 파일에 style 태그로 삽입해주는 패키지
+
+이후 `webpack.config.js`로 가서 다음과 같이 작성한다.
+
+```js
+// webpack.config.js
+// 생략
+module: {
+  rules: [
+    {
+      test: /\.css$/,
+      use: ['style-loader', 'css-loader'], // 순서 중요
+    },
+  ]
+}
+// 후략
+```
+
+- `module.rules.test` : loader를 적용시킬 파일들을 정규식으로 명시
+- `module.rules.use` : 사용할 loader 명시, <u>**오른쪽에서 왼쪽** 순으로 실행</u>됨
+
+터미널에 `npm run dev` 입력 후 페이지를 확인하면 정상적으로 `css`가 적용된 것을 확인할 수 있다.
+
+## SCSS
+
+이번엔 프로젝트에 `SCSS`를 적용해보자.
+
+우선 root에 있는 `css` 폴더와 `style.css` 파일을 각각 `scss`, `style.scss`로 바꾸자.
+
+<img width="199" alt="scss" src="https://user-images.githubusercontent.com/85833148/164056600-f7e6698a-c505-4e62-8324-6bcbde834bcc.png">
+
+그리고 `/js/main.js`를 다음과 같이 수정한다.
+
+```js
+// main.js
+import '../scss/style.scss'
+
+console.log('Webpack!')
+```
+
+필요한 패키지인 `sass-loader`, `sass`를 터미널로 설치한다.
+
+```bash
+npm i -D sass-loader sass
+```
+
+- `sass-loader` : test에 명시된 scss 파일을 해석하게 해주는 패키지
+- `sass` : scss 문법을 해석할 때 실제 사용하는 패키지
+
+이후 `webpack.config.js`로 가서 `css` 파일뿐 아니라 `scss`도 `loader`가 적용되도록 해야 한다.
+
+`sass-loader`, `css-loader`, `style-loader` 순으로 적용되야 한다.
+
+```js
+// webpack.config.js
+// 생략
+module: {
+  rules: [
+    {
+      test: /\.s?css$/,
+      use: ['style-loader', 'css-loader', 'sass-loader'], // 순서 중요
+    },
+  ]
+}
+// 후략
+```
+
+터미널에 `npm run dev` 입력 후 페이지를 확인하면 정상적으로 `scss`가 적용된 것을 확인할 수 있다.
+
+## Babel
+
+우선 `babel`을 동작하기 위해 필요한 `@babel/core`, `@babel/preset-env`, `@babel/plugin-transform-runtime`을 설치한다.
+
+또한 babel을 webpack이 해석할 수 있게 해주는 `babel-loader`도 설치한다.
+
+```bash
+npm i -D @babel/core @babel/preset-env @babel/plugin-transform-runtime babel-loader
+```
+
+이후 root에 `.babelrc.js` 파일을 생성하여 다음과 같이 작성한다.
+
+```js
+module.exports = {
+  presets: ['@babel/preset-env'],
+  plugins: [['@babel/plugin-transform-runtime']],
+}
+```
+
+- `@babel/preset-env` : 따로따로 명시해야 하는 JS의 기능을 한꺼번에 지원하는 패키지
+- `@babel/plugin-transform-runtime` : 비동기 처리를 위한 패키지
+
+이후 `.babelrc.js`이 제대로 동작할 수 있도록 `webpack.config.js`에 명시해 주면 끝이다.
+
+```js
+// webpack.config.js
+// 생략
+ module: {
+    rules: [
+      {
+        test: /\.s?css$/,
+        use: ["style-loader", "css-loader", "sass-loader"],
+      },
+      {
+        test: /\.js$/,
+        use: ["babel-loader"]
+      }
+    ],
+  },
+// 후략
+```
+
+## Typescript + Babel
+
+앞서 설치한 패키지에서 추가적으로 `typescript`, `ts-loader`, `@babel/preset-typescript`를 의존성 모듈로 설치한다.
+
+```bash
+npm i -D typescript ts-loader @babel/preset-typescript
+```

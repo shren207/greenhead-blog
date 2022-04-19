@@ -87,7 +87,7 @@ console.log(str.replace(regexp, 'Gosegu'))
 
 - `g` : 전부 검색
 - `i` : 대소문자 구분없이 검색
-- `m` : 줄바꿈 된 곳 하나하나를 문장을 시작, 끝으로 인식하게 해줌
+- `m` : <u>줄바꿈 된 곳(`\n`)</u> 하나하나를 문장을 시작, 끝으로 인식하게 해줌
 
 `m` 에 대해서 자세히 설명을 하자면 다음과 같다.
 
@@ -107,6 +107,13 @@ const str2 = `^
 ^my name is greenhead$
 ^see you again$
 $`
+
+console.log(str1.match(/^./g)) // null
+console.log(str1.match(/^./gm)) // ['h', 'm', 's']
+console.log(str1.match(/.$/g)) // null
+console.log(str1.match(/.$/gm)) // ['d', 'd', 'n']
+
+// 빈 문자열 ('')은 문자로 취급하지 않음에 주의.
 ```
 
 플래그를 사용해서 좀 더 다양한 정규식을 표현해보자.
@@ -138,7 +145,10 @@ const str = 'hello world'
 
 console.log(str.match(/^h/)) // ['h']
 console.log(str.match(/^he/)) // ['he']
+console.log(str.match(/^w/)) // null
 console.log(str.match(/^d/)) // null
+
+console.log(str.match(/o$/)) // null
 console.log(str.match(/h$/)) // null
 console.log(str.match(/d$/)) // ['d']
 console.log(str.match(/ld$/)) // ['ld']

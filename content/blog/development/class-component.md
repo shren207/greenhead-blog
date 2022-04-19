@@ -55,10 +55,10 @@ class App extends React.Component {
 class App extends React.Component {
   state = { count: 0 }
   add = () => {
-    this.state.count += 1
+    this.state.count += 1 // 에러
   }
   minus = () => {
-    this.state.count -= 1
+    this.state.count -= 1 // 에러
   }
   render() {
     return (

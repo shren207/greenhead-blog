@@ -475,11 +475,3 @@ module.exports = {
   },
 // 후략
 ```
-
-## Typescript + Babel
-
-앞서 설치한 패키지에서 추가적으로 `typescript`, `ts-loader`, `@babel/preset-typescript`를 의존성 모듈로 설치한다.
-
-```bash
-npm i -D typescript ts-loader @babel/preset-typescript
-```

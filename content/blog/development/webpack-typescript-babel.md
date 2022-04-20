@@ -9,6 +9,8 @@ img: false
 
 W사의 과제 해결을 위한 Webpack + Typescript + Babel 템플릿을 만들어 보면서 배운 구조를 기록하고자 한다.
 
+따로 output 생성 없이 서버만 열 수 있도록 구현하였다.
+
 ## 파일 구조
 
 `CSS`는 쓸 일이 없을 것 같아서 여기서는 제외했다.
@@ -29,7 +31,6 @@ W사의 과제 해결을 위한 Webpack + Typescript + Babel 템플릿을 만들
     `babel-loader`
     `style-loader`
     `css-loader`
-    `copy-webpack-plugin`
     `html-webpack-plugin`
     `tsconfig-paths-webpack-plugin`
     `typescript`
@@ -44,7 +45,7 @@ W사의 과제 해결을 위한 Webpack + Typescript + Babel 템플릿을 만들
 ```json
  "scripts": {
     "dev": "webpack-dev-server --mode development",
-    "start": "webpack --mode production"
+    // "start": "webpack --mode production"
   }
 ```
 
@@ -53,7 +54,7 @@ W사의 과제 해결을 위한 Webpack + Typescript + Babel 템플릿을 만들
 ```json
 {
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "./",
     "target": "es5",
     "module": "commonjs",
     "lib": ["dom", "esnext"],

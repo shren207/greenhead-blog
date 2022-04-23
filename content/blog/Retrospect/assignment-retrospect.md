@@ -73,4 +73,12 @@ canvas는 자식 엘리먼트를 가지지 않지만, <**img** /> 엘리먼트�
 ## requestAnimationFrame
 
 - [setInterval vs requestAnimationFrame](https://guiyomi.tistory.com/100)
+- [setIntervsl과 RAF의 차이](https://velog.io/@younghwanjoe/requestAnimationFrame%EC%9D%84-%EC%82%AC%EC%9A%A9%ED%95%98%EC%97%AC-%EC%95%A0%EB%8B%88%EB%A9%94%EC%9D%B4%EC%85%98-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0-%EC%83%81)
 - [setInterval보다 requestAnimationFrame이 더 좋은 이유](https://simsimjae.tistory.com/402)
+- [requestAnimationFrame 상세 설명](https://darrengwon.tistory.com/641)
+
+## Elastic Collision
+
+## Delta Time
+
+## Two-dimensional collision with two moving objects

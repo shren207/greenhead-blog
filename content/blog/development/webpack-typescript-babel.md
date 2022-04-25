@@ -7,7 +7,7 @@ draft: false
 img: false
 ---
 
-W사의 과제 해결을 위한 Webpack + Typescript + Babel 템플릿을 만들어 보면서 배운 구조를 기록하고자 한다.
+Webpack + Typescript + Babel 템플릿을 만들어 보면서 배운 구조를 기록하고자 한다.
 
 따로 output 생성 없이 서버만 열 수 있도록 구현하였다.
 

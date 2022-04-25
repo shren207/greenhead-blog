@@ -7,7 +7,7 @@ draft: false
 img: false
 ---
 
-W사의 과제를 진행 중 `Typescript`에서 `Import`, `Export`를 사용하려니까 브라우저에서 정상적으로 동작하지 않았다.
+`Typescript`에서 `Import`, `Export`를 사용하려니까 브라우저에서 정상적으로 동작하지 않았다.
 이전에는 `CRA(create-react-app)`, `CNA(create-next-app)`등을 사용해서 번들러 설정 고민없이 브라우저에서 바로 사용할 수 있었는데, 이번 과제는 순수 Typescript를 통해서 구현해야 하기에 번들러에 대한 깊은 이해를 필요로 했다. 따라서 글을 적는다.
 
 여기서는 많은 번들러 중 가장 많이 사용되는 `webpack`을 중점으로 정리해볼 것이다.

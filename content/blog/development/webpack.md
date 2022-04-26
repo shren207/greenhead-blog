@@ -3,7 +3,7 @@ title: Webpack 번들러 간단 정리
 date: 2022-04-19 16:04:27
 category: development
 thumbnail: { thumbnailSrc }
-draft: false
+draft: true
 img: false
 ---
 

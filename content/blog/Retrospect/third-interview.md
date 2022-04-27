@@ -88,6 +88,10 @@ wallCollision = (ball: Ball) => {
 쿠버네티스를 배우기 전에 EC2를 띄워 본 적이 있을 것이다. 그 instance의 IP를 기억하고 SSH로 접속해본 적도 있을 것이다.
 만약 여기서 `docker`를 안 썼다면, 소스를 받고, 모듈 설치하고, 서버를 띄우는 등 이러한 과정을 거쳐야 하는데, 이러면서 `OOM(Out Of Memory)` 등의 유쾌하지 못한 경험도 있을 것이다. 이 모든 귀찮은 것들을 쿠버네티스가 전부 알아서 해준다.
 
+- [Docker가 왜 좋은지 5분안에 설명해 줌](https://www.youtube.com/watch?v=chnCcGCTyBg)
+- [쿠버네티스가 대세가 된 이유 3가지](https://www.youtube.com/watch?v=S3FVcdZcZnA&t=3s)
+- [fastcampus 쿠버네티스 강의 (존나 비쌈)](https://fastcampus.co.kr/dev_online_kubemsa)
+
 ## typeORM
 
 `Nest.js` + `typeORM`이 현재 가장 완벽한 프레임워크긴 하다. `auto migration` 기능도 있어서 괜찮은 것 같다.
@@ -103,6 +107,8 @@ But, 현재 db랑 비교해서 `auto migration`을 하니까 조심해야 하는
 
 주의할 점은, <u>`redux`로 통해 모달을 만들려면 `queue`로 구현해야 한다.</u> 만약 `queue`로 구현하지 않는다면 에러가 2개 이상 발생하는 경우 모달이 사라지거나, 내용이 덮어씌워지는 경우가 생긴다.
 
+- [redux-saga 사용하는 이유](https://kyounghwan01.github.io/blog/React/redux/redux-saga/#%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%92%E1%85%A1%E1%84%82%E1%85%B3%E1%86%AB-%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%B2)
+
 ## C++
 
 한번 배워볼 가치는 충분한 언어. 메모리를 스스로 관리해볼 수 있다. 하지만 어렵다. **스마트 포인터** 같은 개념이 어려워서 이후 버젼에 `Rust`처럼 메모리 세이프티를 보장하는 작성법이 추가되긴 했는데 그것도 어렵다. <u>애초에 디버깅이 어렵다.</u> 예를 들어 <u>class를 만들어 콘솔에 class 인스턴스 찍으면 JS는 바로 나오는데 c++은 그렇지 않다.</u>
@@ -112,6 +118,10 @@ But, 현재 db랑 비교해서 `auto migration`을 하니까 조심해야 하는
 **쉐이더**는 몸으로 부딪히지 않는 이상 정말 배우기 힘들다. 왜냐면 디버깅이 안된다. 콘솔같은 걸로 찍어볼 수가 없으니까 (특정한 색깔로 찍어서 확인하는 건 있다). 에러는 나는데, <u>아예 실행이 안되던가, 되던가 2가지 경우만 있다.</u> 그렇기에 코드를 작성할 때 어떻게 작동을 할 건지 등의 컨텍스트를 정확하게 꿰고 있어야 한다.
 
 쉐이더를 다룰 수 있으면 정말 엄청난 것을 만들 수 있다. 쉐이더만 잘하면, <u>내 웹사이트 훨씬 더 예쁘게 꾸며볼 수 있고</u>, <u>카메라 이펙트 효과같은 것들도 (노이즈같은거)</u> 가능한데 코드량만 보면 정말 얼마 안된다. 이런것들은 (전체 코드를) 통과해서 한번에 그려지는 거니까, **병렬적인 사고**를 해야 한다. 잘하려면 머리속에 상상력으로 행렬연산이나, 도형을 그려내야 한다. 이런 말이 있다. <u>“수학자가 되고 싶었는데 상상력이 부족해서 시인이 되었다”</u>.
+
+- [WebGL 기초](https://webglfundamentals.org/webgl/lessons/ko/)
+- [WebGL2 기초](https://webgl2fundamentals.org/webgl/lessons/ko/)
+- [3D 게임을 움직이는 수학과 물리 (책)](https://book.naver.com/bookdb/book_detail.naver?bid=11792229)
 
 # 느낌
 

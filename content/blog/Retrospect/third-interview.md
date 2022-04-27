@@ -124,6 +124,7 @@ But, 현재 db랑 비교해서 `auto migration`을 하니까 조심해야 하는
 - [WebGL 기초](https://webglfundamentals.org/webgl/lessons/ko/)
 - [WebGL2 기초](https://webgl2fundamentals.org/webgl/lessons/ko/)
 - [GLSL / Shader](https://www.opentutorials.org/module/3659)
+- [The Book of Shaders](https://thebookofshaders.com/?lan=kr)
 - [3D 게임을 움직이는 수학과 물리 (책)](https://book.naver.com/bookdb/book_detail.naver?bid=11792229)
 
 # 느낌

@@ -38,7 +38,9 @@ export default class Vector {
 this.ctx = this.canvas.getContext('2d')! // 어선셜 연산자
 ```
 
-- "공과 벽이 부딪히는 경우, 지금처럼 벽과 벽이 수직이 아니라 <u>**사선**</u>이라고 가정할 경우, 지금과 같은 코드로는 정상적으로 동작하지 않는다. <u>사선의 경우는 사선의 법선 벡터의 방향 등을 고려</u>할 필요가 있다"
+- [[TypeScript]타입스크립트 느낌표(!) 사용](https://developer-talk.tistory.com/191)
+
+* "공과 벽이 부딪히는 경우, 지금처럼 벽과 벽이 수직이 아니라 <u>**사선**</u>이라고 가정할 경우, 지금과 같은 코드로는 정상적으로 동작하지 않는다. <u>사선의 경우는 사선의 법선 벡터의 방향 등을 고려</u>할 필요가 있다"
   - 단순히 벡터값을 반전시키는 것은 정말 이 경우에서만 통하는 방식.
 
 ```ts
@@ -121,6 +123,7 @@ But, 현재 db랑 비교해서 `auto migration`을 하니까 조심해야 하는
 
 - [WebGL 기초](https://webglfundamentals.org/webgl/lessons/ko/)
 - [WebGL2 기초](https://webgl2fundamentals.org/webgl/lessons/ko/)
+- [GLSL / Shader](https://www.opentutorials.org/module/3659)
 - [3D 게임을 움직이는 수학과 물리 (책)](https://book.naver.com/bookdb/book_detail.naver?bid=11792229)
 
 # 느낌

@@ -3,7 +3,7 @@ title: 'HTML5 <canvas> 요소로 공튀기기 구현'
 date: 2022-04-23 00:04:80
 category: retrospect
 thumbnail: { thumbnailSrc }
-draft: false
+draft: true
 img: false
 ---
 

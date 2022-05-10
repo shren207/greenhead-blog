@@ -3,7 +3,7 @@ title: Webpack + TS + Babel 세팅
 date: 2022-04-20 13:04:81
 category: development
 thumbnail: { thumbnailSrc }
-draft: true
+draft: false
 img: false
 ---
 

@@ -4,7 +4,7 @@ date: 2021-12-10 19:12:29
 category: development
 thumbnail: { thumbnailSrc }
 draft: false
-img: true
+img: false
 ---
 
 ![rest-client](./img/rest-client.png)

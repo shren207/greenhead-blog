@@ -1,3 +1,9 @@
-## GreenHead의 개발 블로그
+## Greenhead 블로그
 
-하루하루 성장중.
+### dependencies
+
+```
+node v14.18.1
+
+npm v6.14.18
+```

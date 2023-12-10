@@ -17,7 +17,7 @@ img: true
 
 ## 최대힙과 최소힙
 
-![maxHeap](images/maxHeap.png)
+![maxHeap](./img/maxHeap.png)
 
 [//]: # (![maxHeap]&#40;./img/maxHeap.png&#41;)
 

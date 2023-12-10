@@ -18,7 +18,7 @@ export const ThumbnailItem = ({ node }) => {
         </div>
         {/* {node.frontmatter.img ? (
           <img
-            src={require(`./images/${node.frontmatter.category.toLowerCase()}.png`)}
+            src={require(`./img/${node.frontmatter.category.toLowerCase()}.png`)}
             alt="HTML"
           />
         ) : null} */}

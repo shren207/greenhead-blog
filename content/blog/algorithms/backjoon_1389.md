@@ -1,13 +1,14 @@
 ---
 title: '[백준 1389] 케빈 베이컨의 6가지 법칙'
 date: 2021-12-19 23:12:09
-category: algorithms & problems
+category: algorithms
 thumbnail: { thumbnailSrc }
 draft: false
 img: true
 ---
 
 [![backjoon](./img/backjoon.png)](https://www.acmicpc.net/problem/1389)
+
 
 ## 헤맸던 부분
 

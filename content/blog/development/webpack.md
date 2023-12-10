@@ -256,9 +256,10 @@ module.exports = {
 이후 index.html로 가서 다음과 같이 작성한다.
 
 ```html
+
 <body>
-  <h1>Hello Webpack!</h1>
-  <img src="./images/logo.png" alt="logo" />
+<h1>Hello Webpack!</h1>
+<img src="img/logo.png" alt="logo"/>
 </body>
 ```
 

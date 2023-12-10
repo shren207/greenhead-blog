@@ -1,7 +1,7 @@
 ---
 title: 이진힙에 대해 알아보자
 date: 2022-01-14 14:01:39
-category: algorithms & problems
+category: algorithms
 thumbnail: { thumbnailSrc }
 draft: false
 img: true
@@ -17,7 +17,9 @@ img: true
 
 ## 최대힙과 최소힙
 
-![maxHeap](./img/maxHeap.png)
+![maxHeap](images/maxHeap.png)
+
+[//]: # (![maxHeap]&#40;./img/maxHeap.png&#41;)
 
 > **최대 힙**의 배열은 [100, 19, 36, 17, 3, 15, 1, 2, 7]이다.
 

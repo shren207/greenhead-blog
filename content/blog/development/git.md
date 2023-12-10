@@ -9,7 +9,7 @@ img: false
 
 # GIT
 
-![스크린샷 2021-09-02 오후 3.58.35.png](https://www.notion.so/image/https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2Fce76f96f-77b0-4149-9474-117656b5d88c%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2021-09-02_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_3.58.35.png?table=block&id=873335cc-a096-4c3f-9f45-a5b35aedf192&spaceId=afdce364-b2e1-4547-8282-c4a28b754ef8&width=2000&userId=60efd79d-1828-4612-87a4-223e97e23bee&cache=v2)
+![img](https://i.imgur.com/V6WGdMu.png)
 
 > **_위의 사진을 이해하는 것이 중요하다._**
 

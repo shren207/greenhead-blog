@@ -2,8 +2,8 @@ module.exports = {
   title: `Greenhead Blog`,
   description: `Blog posted about ...`,
   author: `Greenhead`,
-  introduction: `완전 초짜 녹두의 개발 다이어리`,
-  siteUrl: `https://greenhead.netlify.app/`, // Your blog site url
+  introduction: `프론트엔드 개발자 윤녹두입니다 :)`,
+  siteUrl: `https://greenhead.blog`, // Your blog site url
   social: {
     twitter: ``, // Your Twitter account
     github: `shren207`, // Your GitHub account

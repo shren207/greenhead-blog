@@ -94,6 +94,7 @@ export const pageQuery = graphql`
             category
             draft
             img
+            thumbnail
           }
         }
       }

@@ -2,7 +2,7 @@
 title: Sequelize 이해 및 실습
 date: 2021-12-23 22:12:80
 category: development
-thumbnail: { thumbnailSrc }
+thumbnail: 'js'
 draft: false
 img: false
 ---

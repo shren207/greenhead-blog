@@ -2,7 +2,7 @@
 title: REST Client 사용법
 date: 2021-12-10 19:12:29
 category: development
-thumbnail: { thumbnailSrc }
+thumbnail: 'js'
 draft: false
 img: false
 ---

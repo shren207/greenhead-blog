@@ -2,7 +2,7 @@
 title: 'Express.js 개념 정리'
 date: 2021-12-22 13:12:67
 category: development
-thumbnail: { thumbnailSrc }
+thumbnail: 'node'
 draft: false
 img: true
 ---

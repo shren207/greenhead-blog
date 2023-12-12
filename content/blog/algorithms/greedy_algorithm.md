@@ -2,7 +2,7 @@
 title: '그리디(Greedy) 알고리즘이란?'
 date: 2021-12-15 20:12:11
 category: algorithms
-thumbnail: { thumbnailSrc }
+thumbnail: 'js'
 draft: false
 img: true
 ---

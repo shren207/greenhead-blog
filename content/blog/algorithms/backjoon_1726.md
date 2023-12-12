@@ -2,7 +2,7 @@
 title: '[백준 1726] 로봇'
 date: 2021-12-20 23:12:87
 category: algorithms
-thumbnail: { thumbnailSrc }
+thumbnail: 'js'
 draft: false
 img: true
 ---

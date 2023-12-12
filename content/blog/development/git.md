@@ -2,7 +2,7 @@
 title: '[GIT] 브랜치'
 date: 2022-01-20 21:01:73
 category: development
-thumbnail: { thumbnailSrc }
+thumbnail: 'git'
 draft: false
 img: false
 ---

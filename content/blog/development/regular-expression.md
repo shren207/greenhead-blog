@@ -2,7 +2,7 @@
 title: 정규표현식 간단 정리
 date: 2022-04-19 22:04:27
 category: development
-thumbnail: { thumbnailSrc }
+thumbnail: 'js'
 draft: false
 img: false
 ---

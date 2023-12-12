@@ -2,9 +2,9 @@
 title: '[TS] Typescript의 타입 시스템'
 date: 2022-05-03 09:44:59
 category: development
-thumbnail: { thumbnailSrc }
+thumbnail: 'ts'
 draft: false
-img: false
+img: true
 ---
 
 ## Typescript 작동 방식

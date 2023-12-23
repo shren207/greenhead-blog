@@ -13,6 +13,9 @@ import { useScrollEvent } from '../hooks/useScrollEvent'
 import { Layout } from '../layout'
 import * as Dom from '../utils/dom'
 import * as EventManager from '../utils/event-manager'
+import { ThemeSwitch } from '../components/theme-switch'
+import { Header } from '../components/header'
+import { rhythm } from '../utils/typography'
 
 const BASE_LINE = 80
 
@@ -30,6 +33,7 @@ export default ({ data, location }) => {
   )
   const [count, countRef, increaseCount] = useRenderedCount()
   const [category, selectCategory] = useCategory()
+  const rootPath = `${__PATH_PREFIX__}/`
 
   useIntersectionObserver()
   useScrollEvent(() => {
@@ -44,21 +48,30 @@ export default ({ data, location }) => {
     })()
   })
 
+  posts.forEach(console.log)
   return (
     <Layout location={location} title={siteMetadata.title}>
-      <Head title={HOME_TITLE} keywords={siteMetadata.keywords} />
-      <Bio />
-      <Category
-        categories={categories}
-        category={category}
-        selectCategory={selectCategory}
-      />
-      <Contents
-        posts={posts}
-        countOfInitialPost={countOfInitialPost}
-        count={count}
-        category={category}
-      />
+      <div style={{position: 'absolute', left: 0, top: '2.4365rem', backgroundColor: 'orange'}}>
+        총 {posts.length}개의 포스트가 있습니다.
+
+      </div>
+      <div style={{maxWidth: rhythm(27), display: 'flex', justifyContent: 'center', flexDirection: 'column'}}>
+        <ThemeSwitch />
+        <Header title={HOME_TITLE} location={location} rootPath={rootPath} />
+        <Head title={HOME_TITLE} keywords={siteMetadata.keywords} />
+        <Bio />
+        <Category
+          categories={categories}
+          category={category}
+          selectCategory={selectCategory}
+        />
+        <Contents
+          posts={posts}
+          countOfInitialPost={countOfInitialPost}
+          count={count}
+          category={category}
+        />
+      </div>
     </Layout>
   )
 }

@@ -18,12 +18,18 @@ export const Layout = ({ location, title, children }) => {
         style={{
           marginLeft: `auto`,
           marginRight: `auto`,
-          maxWidth: rhythm(27), // 기본값은 24, Gparkkii.io의 포스트 폭은 29
+          // maxWidth: rhythm(27), // 기본값은 24, Gparkkii.io의 포스트 폭은 29
           padding: `${rhythm(1.5)} ${rhythm(3 / 4)}`,
+
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          flexDirection: 'column',
+
         }}
       >
-        <ThemeSwitch />
-        <Header title={title} location={location} rootPath={rootPath} />
+        {/*<ThemeSwitch />*/}
+        {/*<Header title={title} location={location} rootPath={rootPath} />*/}
         {children}
         <Footer />
       </div>

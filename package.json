@@ -39,7 +39,6 @@
     "intersection-observer": "^0.5.1",
     "katex": "^0.11.1",
     "lodash": "^4.17.21",
-    "node-sass": "^4.14.0",
     "prismjs": "^1.25.0",
     "query-string": "^6.13.1",
     "react": "^16.8.1",
@@ -48,6 +47,7 @@
     "react-helmet": "^5.2.0",
     "react-switch": "^5.0.0",
     "react-typography": "^0.16.13",
+    "sass": "^1.71.1",
     "smooth-scroll": "^16.0.0",
     "smoothscroll-polyfill": "^0.4.4",
     "typeface-catamaran": "0.0.54",
@@ -87,6 +87,7 @@
     "develop": "gatsby develop",
     "start": "npm run develop",
     "build": "gatsby build",
+    "serve": "gatsby serve --host 0.0.0.0",
     "fix-semi": "eslint --quiet --ignore-pattern node_modules --ignore-pattern public --parser babel-eslint --no-eslintrc --rule '{\"semi\": [2, \"never\"], \"no-extra-semi\": [2]}' --fix gatsby-node.js"
   },
   "engines": {

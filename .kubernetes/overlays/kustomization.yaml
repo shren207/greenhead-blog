@@ -4,7 +4,7 @@ namespace: green-blog-co
 images:
 - name: 971490215356.dkr.ecr.ap-northeast-2.amazonaws.com/green-blog-co
 resources:
-- hpa.yaml
 - gateway.yaml
 - virtual-service.yaml
+- hpa.yaml
 - ../base

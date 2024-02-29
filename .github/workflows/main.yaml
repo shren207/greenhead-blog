@@ -41,3 +41,10 @@ jobs:
           cd .kubernetes/overlays
           kustomize edit set image ${{ steps.build-and-push.outputs.image }}
           cat kustomization.yaml
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "shren207"
+          git config --global user.email "shren0812@gmail.com"
+          git commit -am "Update image to ${{ github.sha }}"
+          git push

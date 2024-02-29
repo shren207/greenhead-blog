@@ -38,6 +38,6 @@ jobs:
 
       - name: Update Kubernetes Resources
         run: |
-          cd kubernetes/overlays
+          cd .kubernetes/overlays
           kustomize edit set image ${{ steps.build-and-push.outputs.image }}
           cat kustomization.yaml

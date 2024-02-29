@@ -16,4 +16,4 @@ spec:
           image: 971490215356.dkr.ecr.ap-northeast-2.amazonaws.com/green-blog-co
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 3000
+            - containerPort: 9000

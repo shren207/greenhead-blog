@@ -7,6 +7,7 @@ metadata:
 spec:
   ports:
     - port: 3000
+      targetPort: 9000
       name: tcp
   selector:
     app: green-blog-co

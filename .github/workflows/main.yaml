@@ -11,6 +11,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v1
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -32,3 +35,9 @@ jobs:
           docker buildx build --platform linux/amd64 -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
           echo "image=$REGISTRY/$REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Update Kubernetes Resources
+        run: |
+          cd kubernetes/overlays
+          kustomize edit set image ${{ steps.build-and-push.outputs.image }}
+          cat kustomization.yaml

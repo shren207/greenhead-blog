@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: green-blog-co
+spec:
+  selector:
+    matchLabels:
+      app: green-blog-co
+  template:
+    metadata:
+      labels:
+        app: green-blog-co
+    spec:
+      containers:
+        - name: green-blog-co
+          image: 971490215356.dkr.ecr.ap-northeast-2.amazonaws.com/green-blog-co
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000

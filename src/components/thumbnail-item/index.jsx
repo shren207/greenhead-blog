@@ -35,7 +35,7 @@ export const ThumbnailItem = ({ node, data }) => {
           <p dangerouslySetInnerHTML={{ __html: node.frontmatter.description || node.excerpt }} />
         </div>
         {node.frontmatter.thumbnail ? (
-          <GatsbyImage className={"gatsby-image"} image={imageData} alt={image.title}/>
+          <GatsbyImage className="gatsby-image" image={imageData} alt="thumbnail"/>
         ) : null}
       </div>
     </Link>

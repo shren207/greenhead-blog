@@ -41,6 +41,7 @@
   .gatsby-image {
     width: 90px; // 80 -> 90
     height: 90px; // 80 -> 90
+    min-width: 90px;
     border-radius: 7px;
     margin-left: 15px;
     margin-top: 30px; // 큐트리 님의 경우는 30px로 설정하셨음! (이미지 위아래 크기)

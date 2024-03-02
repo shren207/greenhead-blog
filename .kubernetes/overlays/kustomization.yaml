@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: green-blog-co
 images:
 - name: 971490215356.dkr.ecr.ap-northeast-2.amazonaws.com/green-blog-co
-  newTag: ce6a1c69d17ce0fa549e51bec6621d9ebaeacfd1
+  newTag: 285f130465b24f783dd63a444145d1d576f4f33a
 resources:
 - gateway.yaml
 - virtual-service.yaml

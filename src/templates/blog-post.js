@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import { graphql } from 'gatsby'
-
 import * as Elements from '../components/elements'
 import { Layout } from '../layout'
 import { Head } from '../components/head'
@@ -9,15 +8,12 @@ import { PostDate } from '../components/post-date'
 import { PostContainer } from '../components/post-container'
 import { Bio } from '../components/bio'
 import { PostNavigator } from '../components/post-navigator'
-import { Disqus } from '../components/disqus'
 import { Utterances } from '../components/utterances'
 import * as ScrollManager from '../utils/scroll'
-
 import '../styles/code.scss'
 import 'katex/dist/katex.min.css'
 
 export default ({ data, pageContext, location }) => {
-  console.log(pageContext)
   useEffect(() => {
     ScrollManager.init()
     return () => ScrollManager.destroy()
@@ -26,7 +22,7 @@ export default ({ data, pageContext, location }) => {
   const post = data.markdownRemark
   const metaData = data.site.siteMetadata
   const { title, comment, siteUrl, author, sponsor } = metaData
-  const { disqusShortName, utterances } = comment
+  const { utterances } = comment
   const { title: postTitle, date } = post.frontmatter
 
   return (
@@ -38,14 +34,6 @@ export default ({ data, pageContext, location }) => {
       <Elements.Hr />
       <Bio />
       <PostNavigator pageContext={pageContext} />
-      {!!disqusShortName && (
-        <Disqus
-          post={post}
-          shortName={disqusShortName}
-          siteUrl={siteUrl}
-          slug={pageContext.slug}
-        />
-      )}
       {!!utterances && <Utterances repo={utterances} />}
     </Layout>
   )
@@ -59,7 +47,6 @@ export const pageQuery = graphql`
         author
         siteUrl
         comment {
-          disqusShortName
           utterances
         }
         sponsor {

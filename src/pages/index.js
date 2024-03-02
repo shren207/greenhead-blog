@@ -87,7 +87,7 @@ export const pageQuery = graphql`
       filter: { frontmatter: { category: { ne: null }, draft: { eq: false } } }
     ) {
       edges {
-        node {
+        node { 
           excerpt(pruneLength: 90, truncate: true)
           fields {
             slug

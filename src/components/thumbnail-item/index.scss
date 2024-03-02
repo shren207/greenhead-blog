@@ -38,7 +38,7 @@
     line-height: 1.4;
   }
 
-  img {
+  .gatsby-image {
     width: 90px; // 80 -> 90
     height: 90px; // 80 -> 90
     border-radius: 7px;
@@ -47,9 +47,8 @@
     transition: all 0.3s;
   }
 }
-.thumbnail:hover img {
+.thumbnail:hover .gatsby-image {
   transform: scale(1.15);
-  transition: 0.3s;
 }
 
 .thumbnail.visible {

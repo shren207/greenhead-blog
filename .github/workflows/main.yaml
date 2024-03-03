@@ -2,7 +2,7 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "DO_NOT_TRIGGER_ACTIONS" ]
 
 jobs:
   deploy:

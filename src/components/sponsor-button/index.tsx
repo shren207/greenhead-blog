@@ -1,8 +1,11 @@
-import React from 'react'
-
+import React, { FC } from 'react'
 import './index.scss'
 
-export const SponsorButton = ({ sponsorId }) => (
+interface SponsorButtonProps {
+  sponsorId: string
+}
+
+export const SponsorButton: FC<SponsorButtonProps>  = ({ sponsorId }) => (
   <div className="sponsor-button">
     <a
       className="bmc-button"

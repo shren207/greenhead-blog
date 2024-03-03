@@ -1,8 +1,11 @@
-import React from 'react'
-
+import React, { FC } from 'react'
 import './index.scss'
 
-export const TwitterIcon = ({ onClick }) => (
+interface TwitterIconProps {
+  onClick: (args: any) => any
+}
+
+export const TwitterIcon: FC<TwitterIconProps> = ({ onClick }) => (
   <a
     className="resp-sharing-button__link"
     href="#"

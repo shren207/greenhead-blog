@@ -5,8 +5,9 @@ import { StaticQuery, graphql } from 'gatsby'
 //* google search engine을 등록하기 위해 googleSiteVerification 변수를 만들고
 //* Helmet 컴포넌트의 meta props으로 전달해 주었다.
 
+const GOOGLE_SITE_VERIFICATION = `BP25-HVmSorHNnOqPF62oesQKoFnc2zqsqAfXp4Vnlw`
+
 export function Head({ description, lang, meta, keywords, title }) {
-  const googleSiteVerification = `BP25-HVmSorHNnOqPF62oesQKoFnc2zqsqAfXp4Vnlw`
   return (
     <StaticQuery
       query={detailsQuery}
@@ -55,7 +56,7 @@ export function Head({ description, lang, meta, keywords, title }) {
               },
               {
                 name: `google-site-verification`,
-                content: googleSiteVerification,
+                content: GOOGLE_SITE_VERIFICATION,
               },
             ]
               .concat(

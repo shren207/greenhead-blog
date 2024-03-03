@@ -1,20 +1,24 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { FacebookIcon } from './facebook-icon'
 import { TwitterIcon } from './twitter-icon'
-import { shareToTwitter, shareToFacebook } from '../../utils/share'
-
+import { shareToTwitter, shareToFacebook } from 'src/utils/share'
 import './index.scss'
 
-export const SocialShare = ({ title, author }) => {
+interface SocialShareProps {
+  title: string
+  author: string
+}
+
+export const SocialShare: FC<SocialShareProps> = ({ title, author }) => {
   const text = `Recommend on "${title}" written by @${author}`
 
-  const onClickTwitterIcon = e => {
+  const onClickTwitterIcon = (e: MouseEvent) => {
     e.preventDefault()
 
     return shareToTwitter(window.location.href, text)
   }
 
-  const onClickFacebookIcon = e => {
+  const onClickFacebookIcon = (e: MouseEvent) => {
     e.preventDefault()
     return shareToFacebook(window.location.href, text)
   }

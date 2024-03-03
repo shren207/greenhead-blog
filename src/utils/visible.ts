@@ -6,19 +6,19 @@ const VISIBLE_RECOGNIZE_CLASS = 'visible'
 const INTERSECTION_OBSERVER_ROOT_MARGIN = '20px'
 const INTERSECTION_OBSERVER_THRESHOLD = 0.8
 
-let observer
+let observer: IntersectionObserver | null
 
-function observeCallback(entries) {
+function observeCallback(entries: IntersectionObserverEntry[]) {
   return entries
     .filter(({ isIntersecting }) => isIntersecting)
     .forEach(({ target }) => Dom.addClass(target, VISIBLE_RECOGNIZE_CLASS))
 }
 
 function observerTargeting() {
-  return Dom.getElements(`.${TARGET_CLASS}`).forEach(el => observer.observe(el))
+  return Dom.getElements(`.${TARGET_CLASS}`).forEach(el => observer?.observe(el))
 }
 
-function disconnect() {
+function disconnect(): Promise<void> {
   if (!observer) {
     throw Error('Not found IntersectionObserver instance')
   }

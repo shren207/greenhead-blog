@@ -1,7 +1,7 @@
-import Typography from 'typography'
-import GitHubTheme from 'typography-theme-github'
+import Typography from 'typography';
+import GitHubTheme from 'typography-theme-github';
 
-GitHubTheme.overrideThemeStyles = () => {
+GitHubTheme.overrideThemeStyles = (): { [key: string]: Partial<CSSStyleDeclaration>} => {
   return {
     a: {
       boxShadow: `none`,
@@ -18,14 +18,14 @@ GitHubTheme.overrideThemeStyles = () => {
     },
 
     h1: {
-      fontWeight: 800,
-      lineHeight: 1.2,
+      fontWeight: '800',
+      lineHeight: '1.2',
       fontFamily: 'Catamaran',
     },
 
     h2: {
-      fontWeight: 700,
-      lineHeight: 1.2,
+      fontWeight: '700',
+      lineHeight: '1.2',
       marginTop: '56px',
       marginBottom: '20px',
       fontFamily: 'Catamaran',
@@ -38,16 +38,16 @@ GitHubTheme.overrideThemeStyles = () => {
     li: {
       marginBottom: '2px',
     },
-  }
-}
+  };
+};
 
-const typography = new Typography(GitHubTheme)
+const typography: Typography = new Typography(GitHubTheme);
 
 // Hot reload typography in development.
 if (process.env.NODE_ENV !== `production`) {
-  typography.injectStyles()
+  typography.injectStyles();
 }
 
-export default typography
-export const rhythm = typography.rhythm
-export const scale = typography.scale
+export default typography;
+export const rhythm: Typography['rhythm'] = typography.rhythm;
+export const scale: Typography['scale'] = typography.scale;

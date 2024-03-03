@@ -1,9 +1,14 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { Link } from 'gatsby'
-
 import './index.scss'
 
-export const Header = ({ title, location, rootPath }) => {
+interface HeaderProps {
+  title: string
+  location: Location
+  rootPath: string
+}
+
+export const Header: FC<HeaderProps> = ({ title, location, rootPath }) => {
   const isRoot = location.pathname === rootPath
   return (
     isRoot && (

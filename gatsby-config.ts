@@ -1,4 +1,5 @@
-const metaConfig = require('./gatsby-meta-config')
+import metaConfig from './gatsby-meta-config'
+import type { FfmpegCommand } from 'fluent-ffmpeg'
 
 module.exports = {
   siteMetadata: metaConfig,
@@ -41,7 +42,7 @@ module.exports = {
               pipelines: [
                 {
                   name: 'vp9',
-                  transcode: chain =>
+                  transcode: (chain: FfmpegCommand) =>
                     chain
                       .videoCodec('libvpx-vp9')
                       .noAudio()
@@ -52,7 +53,7 @@ module.exports = {
                 },
                 {
                   name: 'h264',
-                  transcode: chain =>
+                  transcode: (chain: FfmpegCommand) =>
                     chain
                       .videoCodec('libx264')
                       .noAudio()
@@ -155,7 +156,6 @@ module.exports = {
     `gatsby-transformer-sharp`,
     `gatsby-plugin-sharp`,
     `gatsby-plugin-offline`,
-    `gatsby-plugin-react-helmet`,
     `gatsby-plugin-sass`,
     `gatsby-plugin-lodash`,
     `gatsby-plugin-sitemap`,

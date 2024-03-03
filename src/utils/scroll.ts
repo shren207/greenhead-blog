@@ -1,4 +1,5 @@
-import SmoothScroll from 'smooth-scroll';
+// @ts-ignore
+import SmoothScroll from 'smooth-scroll/dist/smooth-scroll.min'
 import smoothscroll from 'smoothscroll-polyfill';
 
 let scroll: SmoothScroll | null;

@@ -26,12 +26,12 @@ export const ThumbnailItem = ({ node, data }) => {
   const imageData = getImage(image.node.childImageSharp.gatsbyImageData);
 
   return (
-    <Link className={`thumbnail ${TARGET_CLASS}`} to={node.fields.slug}>
-      <div className={`container`} key={node.fields.slug}>
+    <Link className={`thumbnail ${TARGET_CLASS}`} to={node.frontmatter.slug}>
+      <div className={`container`} key={node.frontmatter.slug}>
         <div>
           <span className={`tag`}>{node.frontmatter.category}</span>
           <span className={`date`}>{node.frontmatter.date}</span>
-          <h3>{node.frontmatter.title || node.fields.slug}</h3>
+          <h3>{node.frontmatter.title || node.frontmatter.slug}</h3>
           <p dangerouslySetInnerHTML={{ __html: node.frontmatter.description || node.excerpt }} />
         </div>
         {node.frontmatter.thumbnail ? (

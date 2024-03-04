@@ -23,7 +23,9 @@ function getDistance(currentPos) {
 export default ({ data, location }) => {
   const { siteMetadata } = data.site
   const { countOfInitialPost } = siteMetadata.configs
-  const posts = data.allMarkdownRemark.edges
+
+  const posts = data.allMdx.edges
+
   const categories = useMemo(
     () => _.uniq(posts.map(({ node }) => node.frontmatter.category)),
     []
@@ -82,24 +84,20 @@ export const pageQuery = graphql`
         }
       }
     }
-    allMarkdownRemark(
+    allMdx(
       sort:  { frontmatter: { date: DESC } }
       filter: { frontmatter: { category: { ne: null }, draft: { eq: false } } }
     ) {
       edges {
-        node { 
-          excerpt(pruneLength: 90, truncate: true)
-          fields {
-            slug
-          }
+        node {
           frontmatter {
             date(formatString: "YYYY-MM-DD")
             title
             category
             draft
-            img
             thumbnail
             description
+            slug
           }
         }
       }

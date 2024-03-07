@@ -2,6 +2,7 @@ import metaConfig from './gatsby-meta-config'
 import type { FfmpegCommand } from 'fluent-ffmpeg'
 
 module.exports = {
+  graphqlTypegen: true,
   siteMetadata: metaConfig,
   plugins: [
     {

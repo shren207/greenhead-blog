@@ -16,5 +16,6 @@
     "incremental": true,
     "baseUrl": "."
   },
+  "include": ["./src/**/*", "./gatsby-config.ts"],
   "exclude": ["node_modules"]
 }

@@ -10,4 +10,4 @@
 
 ### 🛠️ 배포 설정 (on cloudflare)
 
-<img width="458" alt="image" src="https://github.com/shren207/greenhead-blog/assets/85833148/d6fc6dcb-36e4-45ef-8e0e-63009fe38bbc">
+<img width="458" alt="image" src="https://github.com/shren207/greenhead-blog/assets/85833148/0dbaedfe-93e9-4660-8be4-c1dd8c01a7f4">

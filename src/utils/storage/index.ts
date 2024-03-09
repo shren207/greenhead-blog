@@ -28,10 +28,10 @@ export function setData(val: any): void {
   return setValueToLocalStorage(LOCAL_STORAGE_KEY, val)
 }
 
-export function getTheme(defaultValue: string): string {
+export function getTheme(defaultValue: boolean): boolean {
   return getValueFromLocalStorage(`${LOCAL_STORAGE_KEY}/theme`) || defaultValue
 }
 
-export function setTheme(val: string): void {
+export function setTheme(val: boolean): void {
   return setValueToLocalStorage(`${LOCAL_STORAGE_KEY}/theme`, val)
 }

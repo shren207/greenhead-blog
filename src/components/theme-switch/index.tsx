@@ -3,9 +3,13 @@ import Switch from 'react-switch'
 
 import * as Dom from '../../utils/dom'
 import * as Storage from '../../utils/storage'
-import { THEME } from '../../constants'
 
 import './index.scss'
+
+const enum THEME {
+  LIGHT = 'light',
+  DARK = 'dark'
+}
 
 const MoonIcon = () => {
   return (
@@ -32,11 +36,11 @@ const SunIcon = () => {
     </svg>
   )
 }
-function getTheme(checked) {
+function getTheme(checked: boolean) {
   return checked ? THEME.DARK : THEME.LIGHT
 }
 
-function toggleTheme(theme) {
+function toggleTheme(theme :THEME) {
   switch (theme) {
     case THEME.LIGHT: {
       Dom.addClassToBody(THEME.LIGHT)
@@ -54,7 +58,7 @@ function toggleTheme(theme) {
 export const ThemeSwitch = () => {
   const [checked, setChecked] = useState(false)
 
-  const handleChange = checked => {
+  const handleChange = (checked: boolean) => {
     const theme = getTheme(checked)
 
     Storage.setTheme(checked)

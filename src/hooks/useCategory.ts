@@ -12,7 +12,7 @@ export function useCategory() {
       ScrollManager.go(DEST_POS)
     }
   }
-  const selectCategory = useCallback(category => {
+  const selectCategory = useCallback((category: string) => {
     setCategory(category)
     adjustScroll()
     window.history.pushState(
@@ -25,7 +25,7 @@ export function useCategory() {
     const { category } = qs.parse(location.search)
     const target = category == null ? CATEGORY_TYPE.ALL : category
 
-    setCategory(target)
+    setCategory(target as string)
     if (withScroll) {
       adjustScroll()
     }
@@ -39,10 +39,10 @@ export function useCategory() {
   }, [])
 
   useEffect(() => {
-    window.addEventListener('popstate', changeCategory)
+    window.addEventListener('popstate', () => changeCategory)
 
     return () => {
-      window.removeEventListener('popstate', changeCategory)
+      window.removeEventListener('popstate', () => changeCategory)
     }
   }, [])
 

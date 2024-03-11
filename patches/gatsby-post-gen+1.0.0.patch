@@ -1,0 +1,47 @@
+diff --git a/node_modules/gatsby-post-gen/lib/index.js b/node_modules/gatsby-post-gen/lib/index.js
+index 300e662..dbd0e4b 100644
+--- a/node_modules/gatsby-post-gen/lib/index.js
++++ b/node_modules/gatsby-post-gen/lib/index.js
+@@ -8,7 +8,7 @@ const inquirer = require('inquirer')
+ const log = require('signale')
+ const cwd = process.cwd()
+ 
+-const CONTENTS_DIR = '/content/blog'
++const CONTENTS_DIR = '/src/pages/blog'
+ const TARGET_DIR = `${cwd}${CONTENTS_DIR}`
+ const IGNORE_DIR = 'images'
+ const UTF_8 = 'utf8'
+@@ -104,11 +104,11 @@ const fetchTitle = async category => {
+         }
+ 
+         const fileName = getFileName(val)
+-        const dest = `${TARGET_DIR}/${category}/${fileName}.md`
++        const dest = `${TARGET_DIR}/${category}/${fileName}.mdx`
+         const destFileExists = await fs.pathExists(dest)
+ 
+         if (destFileExists) {
+-          return `⚠️  Already exist file name:: ${fileName}.md.`
++          return `⚠️  Already exist file name:: ${fileName}.mdx.`
+         }
+ 
+         return true
+@@ -142,8 +142,9 @@ module.exports = (async function() {
+     thumbnail: '{ thumbnailSrc }',
+     draft: false,
+   })
++  const mdxContents = `${contents}import Layout from '/src/templates/blog-post';\nexport default Layout;`;
+ 
+-  fs.writeFile(`${destDir}/${fileName}.md`, contents, err => {
++  fs.writeFile(`${destDir}/${fileName}.mdx`, mdxContents, err => {
+     if (err) {
+       log.error('Unknown Error: Cannot write file!')
+       return
+@@ -151,7 +152,7 @@ module.exports = (async function() {
+     console.log('')
+ 
+     log.complete(
+-      `🚀 Success to create new post! /${category}/${fileName}.md\n\n${contents}`
++      `🚀 Success to create new post! /${category}/${fileName}.mdx\n\n${contents}`
+     )
+     log.star(`✏️  Let's start blogging!\n`)
+   })

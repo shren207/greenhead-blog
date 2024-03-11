@@ -1,0 +1,22 @@
+---
+title: "[K8S] 프론트엔드 개발자의 EKS 경험기 2️⃣"
+date: 2024-03-04 14:03:60
+category: til
+thumbnail: 'k8s'
+description: '도커 이미지 AWS ECR에 업로드하기'
+draft: true
+---
+
+import Layout from '/src/templates/blog-post';
+export default Layout;
+
+## ⬆️ 도커 이미지 AWS ECR에 업로드하기
+
+![](https://i.imgur.com/QcfTF7E.png)
+
+이전 글에서 내 개발블로그 프로젝트를 도커라이징하는 데 성공하였다. 이번에는 이 도커 이미지를 AWS ECR에 업로드하는 과정을 정리해보겠다.
+
+AWS ECR은 **Public**, **Private** 두 종류의 레지스트리를 제공한다. 나의 경우 Private 레지스트리를 사용하였는데, 월 요금이 1달러 미만으로 나왔기 때문에 실습할 때 굳이 Public을 사용하지 않아도 될 것 같다.
+
+### 1. AWS ECR 레지스트리 생성
+

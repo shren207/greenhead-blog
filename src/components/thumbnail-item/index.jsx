@@ -9,7 +9,7 @@ import './index.scss'
 export const ThumbnailItem = ({ node, data }) => {
   const result = useStaticQuery(graphql`
       query {
-          allFile(filter: {sourceInstanceName: {eq: "assets"}, relativePath: {regex: "/images\\//"}}) {
+          allFile(filter: {sourceInstanceName: {eq: "assets"}, relativePath: {regex: "/thumbnails\\//"}}) {
               edges {
                   node {
                       relativePath
@@ -22,7 +22,7 @@ export const ThumbnailItem = ({ node, data }) => {
       }
   `);
 
-  const image = result.allFile.edges.find(edge => edge.node.relativePath === `images/${node.frontmatter.thumbnail.toLowerCase()}.png`);
+  const image = result.allFile.edges.find(edge => edge.node.relativePath === `thumbnails/${node.frontmatter.thumbnail.toLowerCase()}.png`);
   const imageData = getImage(image.node.childImageSharp.gatsbyImageData);
 
   return (

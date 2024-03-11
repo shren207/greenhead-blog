@@ -10,6 +10,9 @@ draft: false
 import Layout from '/src/templates/blog-post';
 export default Layout;
 
+import videoSrc1 from '/content/assets/videos/2023-12-19_1.mp4';
+import videoSrc2 from '/content/assets/videos/2023-12-19_2.mp4';
+
 ### 🧐 Zod란?
 
 ![](https://i.imgur.com/RCWCoux.png)
@@ -134,7 +137,7 @@ zod 스키마를 전부 작성했다면, 위와 같이 `useForm`, `zodResolver`�
 그렇다면 실제로 동작하는 방식은 아래 동영상과 같다.
 
 <video width="50%" height="auto" controls>
-  <source src="../../assets/videos/2023-12-19_1.mp4" type="video/mp4" />
+  <source src={videoSrc1} type="video/mp4" />
 </video>
 
 
@@ -148,7 +151,7 @@ zod 스키마를 전부 작성했다면, 위와 같이 `useForm`, `zodResolver`�
 
 
 <video width="50%" height="auto" controls>
-  <source src="../../assets/videos/2023-12-19_2.mp4" type="video/mp4" />
+  <source src={videoSrc2} type="video/mp4" />
 </video>
 
 따라서, 요구사항을 만족하기 위해서는 둘다 `onSubmit` 값을 주어야 한다.

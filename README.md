@@ -4,7 +4,7 @@
 
 - [x] EKS 클러스터에 블로그 배포하기
 - [x] MD -> [MDX](https://github.com/mdx-js/mdx/) 전환하기
-- [ ] Typescript 전환하기 (55.5%)
+- [ ] JS -> TS 전환하기 (55.5%)
 - [ ] [반응형 SASS](https://tech.devsisters.com/posts/shrinking-webpage/) 적용하기
 - [ ] 포스트, 태그 개수 보여주는 사이드바 만들기
 

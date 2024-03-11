@@ -69,6 +69,7 @@
     "gatsby-post-gen": "^1.0.0",
     "gray-matter": "^4.0.2",
     "inquirer": "^6.2.2",
+    "patch-package": "^8.0.0",
     "prettier": "^1.14.2",
     "recursive-readdir": "^2.2.2",
     "signale": "^1.3.0",
@@ -83,6 +84,7 @@
     "start": "npm run develop",
     "build": "gatsby build",
     "serve": "gatsby serve --host 0.0.0.0",
-    "fix-semi": "eslint --quiet --ignore-pattern node_modules --ignore-pattern public --parser babel-eslint --no-eslintrc --rule '{\"semi\": [2, \"never\"], \"no-extra-semi\": [2]}' --fix gatsby-node.js"
+    "fix-semi": "eslint --quiet --ignore-pattern node_modules --ignore-pattern public --parser babel-eslint --no-eslintrc --rule '{\"semi\": [2, \"never\"], \"no-extra-semi\": [2]}' --fix gatsby-node.js",
+    "postinstall": "patch-package"
   }
 }

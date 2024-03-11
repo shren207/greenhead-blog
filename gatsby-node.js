@@ -19,26 +19,32 @@ exports.createPages = async ({ graphql, actions }) => {
             edges {
                 node {
                     id
+                    fields {
+                        slug
+                    }
                     frontmatter {
                         title
                         category
                         date(formatString: "MMMM DD, YYYY")
-                        slug
                     }
                     internal {
                         contentFilePath
                     }
                 }
                 previous {
+                    fields {
+                        slug
+                    }
                     frontmatter {
                         title
-                        slug
                     }
                 }
                 next {
+                    fields {
+                        slug
+                    }
                     frontmatter {
                         title
-                        slug
                     }
                 }
             }
@@ -53,11 +59,12 @@ exports.createPages = async ({ graphql, actions }) => {
     const posts = result.data.allMdx.edges
     posts.forEach(post => {
       createPage({
-        path: post.node.frontmatter.slug,
-        component: `${postTemplate}?__contentFilePath=${post.node.internal.contentFilePath}`,
+        path: post.node.fields.slug,
+        component: post.node.internal.contentFilePath,
+        // component: `${postTemplate}?__contentFilePath=${post.node.internal.contentFilePath}`,
         context: {
           mdx: post.node,
-          slug: post.node.frontmatter.slug,
+          slug: post.node.fields.slug,
           previous: post.next,
           next: post.previous
         },

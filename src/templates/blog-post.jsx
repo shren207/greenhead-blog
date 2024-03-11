@@ -57,25 +57,3 @@ export default function PageTemplate ({  pageContext, location, children }) {
     </Layout>
   )
 }
-
-// export const pageQuery = graphql`
-//   query ($slug: String!) {
-//     site {
-//       siteMetadata {
-//         title
-//         author
-//         siteUrl
-//         comment {
-//           utterances
-//         }
-//       }
-//     }
-//     mdx(frontmatter: { slug: { eq: $slug } }) {
-//       excerpt(pruneLength: 280)
-//       frontmatter {
-//         title
-//         date(formatString: "MMMM DD, YYYY")
-//       }
-//     }
-//   }
-// `

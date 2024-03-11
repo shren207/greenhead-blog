@@ -1,0 +1,89 @@
+---
+title: '[JS] 변수'
+date: 2021-07-20 20:03:04
+category: til
+thumbnail: 'js'
+draft: true
+img: false
+---
+
+import Layout from '/src/templates/blog-post';
+export default Layout;
+
+# ▶️ 변수
+
+### 변수의 선언과 할당
+
+변수는 **상황에 따라 변할 수 있는 값**
+
+- `myName` ⇒ 들어갈 수 있는 값이 다 다르다 (nokdoo, hira, lynn ...)
+- 변수명 ⇒ **camelCase**
+  `myname` : **X**
+
+  `myName` : **O**
+
+- 선언(Declaration)은 `let myName`
+  ```jsx
+  [선언 방법]
+  (1) let hello**;**
+      let world;
+
+  (2) let hello**,** world;
+
+  (3) let hello,
+          world;
+  ```
+- 할당(Assignment)은 `myName = 'hira'`
+- 선언과 할당을 동시에 하면 `let myName = 'hira'`
+  ► **const**의 경우는 무조건 선언과 할당을 동시에 해야 한다. (재할당이 불가능하므로)
+
+### 변수의 종류 [var, let, const]
+
+$$
+\begin{array}{|c|c|c|c|}\hline
+      & var & let & const \\\hline
+     re-declare       & O           & X & X \\\hline
+     re-assgin      & O              & O  & X\\\hline
+     hoisting     & O             & X &X\\\hline
+scope & function & function, block &function, block \\\hline
+\end{array}
+$$
+
+**변수 호이스팅**
+
+```jsx
+console.log(myName)
+var myName = 'hira' // undefined
+
+// 이렇게 하면 에러가 뜨지 않고 undefined가 나오는데 이유는 var는 **호이스팅**이 되기 때문에 실제로는,
+var myName
+console.log(myName) // undefined
+myName = 'hira'
+
+// 이렇게 동작하기때문이다. 따라서 이를 막기 위해 **let**, **const**를 반드시 사용해야 한다.
+```
+
+**스코프(scope)** : 변수의 접근할 수 있는 범위
+
+```jsx
+if (true) {
+  **let** myName = 'hira';
+}
+console.log(myName); // **ReferenceError**: myName is not defined
+```
+
+즉 `let`, `const`는 **함수**, **블록 스코프**의 영향을 받기때문에 스코프 밖에서는 사용할 수 없다.
+하지만 `var`는 오직 **함수 스코프**의 영향만을 받기 때문에 밑의 예시와 같은 상황이 발생할 수 있다.
+
+```jsx
+if (true) {
+  **var** myName = 'hira';
+}
+console.log(myName); // **hira**
+```
+
+**결론**
+
+- default는 `const`
+- 값을 바꾸고 싶다면 `let`
+- `var`는 절대 **X**

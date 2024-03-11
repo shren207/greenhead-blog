@@ -1,0 +1,254 @@
+---
+title: 정규표현식 간단 정리
+date: 2022-04-19 22:04:27
+category: til
+thumbnail: 'js'
+draft: false
+img: false
+---
+
+import Layout from '/src/templates/blog-post';
+export default Layout;
+
+> "**정규표현식**이란 문자열을 검색하고 대체하는 데 사용 가능한 일종의 형식 언어(패턴)입니다. 간단한 문자 검색부터 이메일, 패스워드, 검사등의 복잡한 문자 일치 기능 등을 정규식 패턴으로 빠르게 수행할 수 있습니다. 단, 정규식 패턴은 가독성이 많이 떨어지기 때문에 입문자들이 어려워하는 경우가 많습니다. 하지만 초반 개념만 잘 잡으면 금방 익숙해질 수 있습니다." -HEROPY-
+
+<u>유효성 검사</u>, <u>문자열 알고리즘 문제</u> 등을 다룰 때 정규표현식을 사용하면 그렇지 않은 경우에 비해 <u>코드량이 훨씬 줄어들고, 더욱 강력한 기능을 제공</u>한다. 어렴풋이 알고 있던 개념이라 이참에 기본적인 것들을 공부하고 정리해 보고자 한다.
+
+## 정규표현식
+
+정규표현식은 크게 다음과 같은 역할을 수행한다.
+
+- 문자 검색 (search)
+- 문자 대체 (replace)
+- 문자 추출 (extract)
+
+다음 사이트에서 정규표현식을 테스트할 수 있다.
+
+- https://regexr.com
+- https://regex101.com
+- https://regexper.com
+
+## JS 정규식 생성 방법
+
+JS에서 정규식을 생성하는 방식은 2가지로, `생성자 함수 방식`과 `리터럴 방식`이 있다.
+보통은 더 간단한 `리터럴 방식`을 사용한다.
+
+또한 정규식에 적용할 수 있는 여러가지 옵션들을 `플래그`라고 부른다.
+
+### 생성자 함수 방식
+
+`RegExp` 생성자 함수를 호출하여 사용한다.
+
+```js
+const regexp1 = new RegExp('^abc')
+// new RegExp(표현식)
+const regexp2 = new RegExp('^abc', 'gi')
+// new RegExp(표현식, 플래그)
+```
+
+### 리터럴 방식
+
+정규식은 `/`로 감싸진 패턴을 리터럴로 사용한다.
+
+```js
+const regexp1 = /^abc/
+// 1. /표현식
+const regexp2 = /^abc/gi
+// 2. /표현식/플래그
+```
+
+## 정규식 메서드
+
+주로 쓰이는 메서드는 `test`, `match`, `replace`가 있다.
+
+- `test`
+  - `정규식.test(문자열)`
+  - 일치 여부(Boolean) 반환
+- `match`
+  - `문자열.match(정규식)`
+  - 일치하는 문자열을 배열에 담아 반환
+- `replace`
+  - `문자열.replace(정규식, 대체문자)`
+  - 일치하는 문자열을 대체한 새로운 문자열 반환
+
+```js
+const str = 'The quick brown fox jumps over the lazy dog.'
+
+const regexp = /fox/gi
+
+console.log(regexp.test(str))
+// true
+console.log(str.match(regexp))
+// ['fox']
+console.log(str.replace(regexp, 'Gosegu'))
+// The quick brown Gosegu jumps over the lazy dog.
+```
+
+## 플래그(옵션)
+
+주로 쓰이는 플래그는 `g(global)`, `i(ignore case)`, `m(multi line)`이 있다.
+
+- `g` : 전부 검색
+- `i` : 대소문자 구분없이 검색
+- `m` : <u>줄바꿈 된 곳(`\n`)</u> 하나하나를 문장을 시작, 끝으로 인식하게 해줌
+
+`m` 에 대해서 자세히 설명을 하자면 다음과 같다.
+
+```js
+// 문장의 시작을 `^`, 끝을 `$`라고 표현해보자.
+
+// 1. `m` 플래그를 사용하지 않는 경우
+const str1 = `^
+hello world
+my name is greenhead
+see you again
+$`
+
+// 2. `m` 플래그를 사용하는 경우
+const str2 = `^
+^hello world$
+^my name is greenhead$
+^see you again$
+$`
+
+console.log(str1.match(/^./g)) // null
+console.log(str1.match(/^./gm)) // ['h', 'm', 's']
+console.log(str1.match(/.$/g)) // null
+console.log(str1.match(/.$/gm)) // ['d', 'd', 'n']
+
+// 빈 문자열 ('')은 문자로 취급하지 않음에 주의.
+```
+
+플래그를 사용해서 좀 더 다양한 정규식을 표현해보자.
+
+```js
+const str = `
+010-1234-5678.
+thesecon@gmail.com
+https://www.omdbapi.com/?apikey=7035c60c&s=frozen
+The quick brown fox jumps over the lazy dog.
+abbcccdddd
+`
+// 문자열의 가장 마지막($)은 abbcccdddd가 끝나는 부분이 아닌, `이 끝나는 부분이다.
+
+// \ : 바로 뒤에 작성된 `.`, `^`, `?` 등의 특수 문자를 일반 문자로 인식하게 해줌.
+// $ : 문자열 끝에서 해당 정규식에 일치하는 $ 바로 앞에 작성된 문자를 찾음
+console.log(str.match(/\.$/)) // null
+console.log(str.match(/\.$/m)) // ['.']
+console.log(str.match(/\.$/gm)) // ['.', '.']
+```
+
+### 패턴(표현)
+
+- `^ab` : 줄(Line) 시작에 있는 ab와 일치
+- `ab$` : 줄(Line) 시작에 있는 ab와 일치
+
+```js
+const str = 'hello world'
+
+console.log(str.match(/^h/)) // ['h']
+console.log(str.match(/^he/)) // ['he']
+console.log(str.match(/^w/)) // null
+console.log(str.match(/^d/)) // null
+
+console.log(str.match(/o$/)) // null
+console.log(str.match(/h$/)) // null
+console.log(str.match(/d$/)) // ['d']
+console.log(str.match(/ld$/)) // ['ld']
+```
+
+- `.` : 임의의 한 문자와 일치
+- `a.b` :
+- `a|b` : a **또는** b와 일치
+- `ab?` : a **그리고** b가 없거나 b와 일치
+
+```js
+const str = 'hello world'
+
+console.log(str.match(/./)) // ['h']
+console.log(str.match(/./g)) // ['h', 'e', 'l', 'l', 'o', '', 'w', 'o', 'r', 'l', 'd']
+console.log(str.match(/h..l/)) // ['hell']
+console.log(str.match(/he|wo/)) // ['he']
+console.log(str.match(/wo|he/)) // ['he']
+console.log(str.match(/he|wo/g)) // ['he', 'wo']
+console.log(str.match(/or?/g)) // ['o', 'or']
+```
+
+- `a{3}` : a가 3개 **연속** 일치
+- `a{3,}` : a가 3개 이상 **연속** 일치
+- `a{3, 5}` : a가 3개 이상, 5개 이하 **연속** 일치
+
+```js
+const str = 'hello world'
+
+console.log(str.match(/\w{3}/g)) // ['hel', 'wor']
+console.log(str.match(/\w{2,3}/g)) // ['hel', 'lo', 'wor', 'ld']
+console.log(str.match(/\b\w{2,3}\b/g)) // null
+console.log(str.match(/\b\w{2,4}\b/g)) // null
+console.log(str.match(/\b\w{2,5}\b/g)) // ['hello', 'world']
+```
+
+- `[abc]` : a 또는 b 또는 c (각각의 글자들이 |로 나뉘어져 있다고 생각) (`/abc/`는 전부 매칭)
+- `[^abc]` : a 그리고 b 그리고 c가 아닌 것
+- `[a-z]` : a부터 z 사이의 문자 구간에 일치 (영어 소문자)
+- `[^a-z]` : 영어 소문자가 아닌 것
+- `[A-Z]` : A부터 Z 사이의 문자 구간에 일치 (영어 대문자)
+- `[^A-Z]` : 영어 대문자가 아닌 것
+- `[0-9]` : 0부터 9 사이의 문자 구간에 일치 (숫자)
+- `[^0-9]` : 숫자가 아닌 것
+- `[가-힣]` : 가부터 힣 사이의 문자 구간에 일치 (한글)
+- `[^가-힣]` : 한글이 아닌 것
+
+```js
+const str = `
+010-1234-5678.
+thesecon@gmail.com
+https://www.omdbapi.com/?apikey=7035c60c&s=frozen
+The quick brown fox jumps over the lazy dog.
+동해물과 백두산이 마르고 닳도록
+abbcccdddd
+`
+
+console.log(str.match(/[0-9]{1,}/g)) // ['010', '1234', '5678', '7035', '60']
+console.log(str.match(/[가-힣]{1,}/g)) // ['동해물과', '백두산이', '마르고', '닳도록']
+```
+
+- `\w` : 영어 대소문자 + 숫자 + \_ 의 63개 문자 (Word) (`[a-zA-Z0-9]`)
+- `\b` : 63개 문자가 아닌 것들을 기준으로 표시하는 경계 (Boundary) (문자가 아님)
+- `\d` : 숫자 (Digit) (`[0-9]`)
+- `\s` : 공백, 줄바꿈 (Space, Tab)
+
+```js
+const str1 = 'shren0812@gmail.com'
+
+console.log(str1.match(/\w{1,}/g)) // ['shren0812', 'gmail', 'com']
+console.log(str1.match(/\b/g)) // ['', '', '', '', '', '']
+
+// str의 경계(\b)를 |로 표현하면 다음과 같다.
+// str1 = |shren0812|@|gmail|.|com| => 총 6개
+
+const str2 = `
+hello world
+goodbye world
+`
+
+console.log(str.match(/\b/g)) // ['', '', '', '', '', '', '', '']
+console.log(str.match(/\b/gm)) // ['', '', '', '', '', '', '', '']
+
+/* Space, Tab을 기준으로 Boundary 설정
+str2 = `
+|hello| |world|
+|goodbye| |world|
+`
+/*
+```
+
+- `(?=)` : 앞쪽 일치
+- `(?<=)` : 뒤쪽 일치
+
+```js
+const str = 'shren0812@gmail.com'
+
+console.log(str.match(/.{1,}(?=@)/)) // ['shren0812']
+console.log(str.match(/(?<=@).{1,}/)) // ['gmail.com']
+```

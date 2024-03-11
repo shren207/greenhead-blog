@@ -1,0 +1,210 @@
+---
+title: '[React] RHF에 Zod 끼얹기'
+date: 2023-12-19 18:12:57
+category: til
+thumbnail: 'rhf'
+description: '유효성 검사 라이브러리 Zod를 React Hook Form에 통합하는 방법을 알아보자.'
+draft: false
+---
+
+import Layout from '/src/templates/blog-post';
+export default Layout;
+
+### 🧐 Zod란?
+
+![](https://i.imgur.com/RCWCoux.png)
+
+[zod](https://github.com/colinhacks/zod)는 <u>Typescript로 작성된 유효성 검사 라이브러리</u>이다.
+
+`zod` 이전에는 [yup](https://github.com/jquense/yup)이 널리 사용되었으나, Typescript 통합을 장점으로 내세운 `zod`의 등장으로 인해 이전만큼의 위세는 아니게 된 상태이다.
+
+하지만 `yup` 또한 여전히 많은 사람들이 사용하고 있고, 최근에는 `yup` 또한 Typescript를 지원하고 있으므로, <u>둘 중 어떤 것을 사용할지는 순전히 선택의 문제</u>이다.
+
+
+### 🧐 zod 사용방법
+
+아래와 같이 필요한 라이브러리를 설치한다.
+
+```bash
+yarn add zod react-hook-form @hookform/resolvers
+```
+
+설치했으면 아래와 같이 모듈을 import할 수 있다.
+
+```tsx
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+```
+
+
+### 📝 zod 스키마 작성
+
+
+```markdown
+유효성 검사 방식 : 제출(submit)할 때만 검사
+
+1. 이메일
+  - 필수값
+  - 유효한 이메일 형식인지 확인
+
+2. 비밀번호
+  - 필수값
+  - 6자 이상, 30자 이하
+  - 비밀번호 확인과 일치하는지 확인
+```
+
+위와 같이 폼의 유효성 검사 로직을 작성해보자.
+
+
+
+```ts
+const schema = z
+  .object({
+    email: z
+      .string({
+        required_error: '이메일을 입력해주세요.',
+      })
+      .email({ message: '이메일 형식에 맞지 않습니다.' }),
+    password: z
+      .string({
+        required_error: '비밀번호를 입력해주세요.',
+      })
+      .min(6, { message: '최소 6자 이상으로 입력해주세요.' })
+      .max(30, { message: '최대 30자까지 입력 가능합니다.' }),
+    passwordCheck: z.string({
+      required_error: '비밀번호를 입력해주세요.',
+    }),
+  })
+  .superRefine(({ password, passwordCheck }, context) => {
+    if (password !== passwordCheck) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: '비밀번호가 일치하지 않습니다.',
+        path: ['passwordCheck'],
+      });
+    }
+  });
+```
+기본적으로 zod로 작성한 스키마의 모든 필드는 `NonNullable`이다.
+  * `null` 값을 허용하고 싶은 경우에는 `.nullable()` 메서드를 사용.
+  * `null`, `undefined` 값을 허용하고 싶은 경우네는 `.nullish()` 메서드를 사용.
+
+
+필수 항목을 작성하지 않았을 때 커스텀 에러메세지를 띄우고 싶다면 아래와 같이 작성한다.
+
+```
+.[원시형]({ required_error: "에러메세지" })
+```
+
+위 예제에서는 `.string({ required_error: '이메일을 입력해주세요.'})`로 작성했다.
+
+참고로, 비슷한 기능을 제공할 것처럼 보이는 `nonempty` 메서드 또한 존재하는데, 이는 예상과는 달리 <u>배열의 길이가 0이 아니도록 하는 검사 메서드</u>이므로 주의한다..
+
+<img src="https://i.imgur.com/2y4qzHD.png" />
+
+
+**비밀번호**, **비밀번호 확인**과 같이, <u>동시에 2개의 필드를 서로 대조해가면서 유효성을 검사</u>하고 싶은 경우에는, [여기 stack overflow 글](https://stackoverflow.com/questions/73695535/how-to-check-confirm-password-with-zod)을 참조하면 <u>커스텀 유효성 검사</u>를 작성할 수 있는 `superRefine` 메서드를 사용해야 한다.
+
+
+
+### 🔗 RHF에 zod 연결하기
+
+
+```ts
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+...
+
+const { control, handleSubmit } = useForm({
+  resolver: zodResolver(schema),
+  mode: 'onSubmit', // 제출할 때만 유효성 검사
+  reValidateMode: 'onSubmit', // 제출할 때만 유효성 검사
+});
+```
+
+
+zod 스키마를 전부 작성했다면, 위와 같이 `useForm`, `zodResolver`를 import해온 다음 `useForm` 메서드를 호출해야 한다.
+
+실시간 유효성 검사가 아니라 제출 버튼을 클릭할 때 검사하므로 `mode`, `reValidateMode` 프로퍼티를 다음과 같이 정의힌다.
+  * `mode: 'onSubmit'`
+  * `reValidateMode: 'onSubmit'`
+
+그렇다면 실제로 동작하는 방식은 아래 동영상과 같다.
+
+<video width="50%" height="auto" controls>
+  <source src="../../assets/videos/2023-12-19_1.mp4" type="video/mp4" />
+</video>
+
+
+<br />
+<br />
+
+
+만약, `mode: 'onSubmit'`만 정의하고, `reValidateMode`를 따로 정의하지 않는다면, 최초 1회 submit되기 전까지는 `onSubmit`으로 동작하다가, 이후 submit이 된 경우에는 `onChange`로 동작하게 된다.
+
+<br />
+
+
+<video width="50%" height="auto" controls>
+  <source src="../../assets/videos/2023-12-19_2.mp4" type="video/mp4" />
+</video>
+
+따라서, 요구사항을 만족하기 위해서는 둘다 `onSubmit` 값을 주어야 한다.
+
+
+---
+
+### 😱 RHF과 zod를 같이 사용할 때의 주의점
+
+```jsx
+const { control, handleSubmit } = useForm({
+  resolver: zodResolver(schema),
+  mode: 'onSubmit',
+  reValidateMode: 'onSubmit',
+});
+```
+
+위와 같이 `useForm`을 호출할 때 커스텀 `resolver`를 등록하게 되는 경우, `<Controller>`에 작성한 `rules` 속성은 무시된다!!
+
+
+
+#### ❌ useForm에 resolver 필드를 정의하지 않는 경우
+
+```jsx
+const { control, handleSubmit } = useForm({
+  // resolver: zodResolver(schema),
+  mode: 'onSubmit',
+  reValidateMode: 'onSubmit',
+});
+```
+
+위와 같이 `useForm`을 호출할 때 따로 `resolver`를 정의하지 않고,
+
+![](https://i.imgur.com/tLMRMtg.png)
+
+`Controller`의 rules prop에서 `"입력해주세요"`라고 에러 메세지를 작성한다.
+
+![](https://i.imgur.com/Le0YaTK.png)
+
+`zod`로 정의한 스키마에서는 `"이메일을 입력해주세요."`라고 에러 메세지를 작성했다고 해 보자.
+
+<img src="https://i.imgur.com/uexLGqI.jpg" width="40%" />
+
+그렇다면 위처럼 `rules` prop이 정상적으로 적용된 것을 확인할 수 있다.
+
+#### ⭕️ useForm에 resolver 필드를 정의한 경우
+
+![](https://i.imgur.com/cagpojH.png)
+
+이번에는 `required_error`를 따로 정의하지 않은채로, resolver 필드를 정의해보자.
+
+<img src="https://i.imgur.com/42YFtUd.jpg" width="40%" />
+
+그렇다면 `rules`의 `"입력해주세요"` 에러메세지는 무시되고, `react-hook-form`의 디폴트 에러메세지가 출력되는 것을 확인할 수 있다...
+
+> 즉, `zod`를 `resolver`로 사용하는 것이라면, `Controller`에 `rules`를 정의할 필요도 없을 뿐더러, 적용해봤자 무시된다.
+
+
+

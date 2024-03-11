@@ -1,0 +1,233 @@
+---
+title: "[TS] react-i18next 다국어텍스트 타입 지정"
+date: 2024-01-06 13:01:00
+category: til
+thumbnail: 'ts'
+description: '유저의 휴대폰 시스템 언어를 앱 최초 언어로 설정하려고 했을 때 발생한 타입 에러 해결기.'
+draft: false
+---
+
+import Layout from '/src/templates/blog-post';
+export default Layout;
+
+React Native에서 `react-i18next`를 사용해서 <u>1️⃣한국어</u>, <u>2️⃣영어</u>, <u>3️⃣인도네시아어</u> 총 3개의 언어를 지원할 필요가 있었다.
+
+사용한 다국어 라이브러리와 각각의 버젼은 다음과 같다.
+
+
+```
+- i18next: v22.5.11
+- react-i18next: v12.3.1
+- react-native-localize: v2.2.6 (기기 시스템 언어 가져오기 위해 사용)
+```
+
+파일 구조는 다음과 같다.
+
+```bash
+./
+│
+│...
+│
+├── i18n.ts
+├── i18next.d.ts
+└── locales
+    ├── en
+    │   ├── index.ts
+    │   └── translation.json
+    ├── id
+    │   ├── index.ts
+    │   └── translation.json
+    └── ko
+        ├── index.ts
+        └── translation.json
+```
+
+
+### 1️⃣ i18n.ts
+
+```tsx
+import i18next from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import { getLocales } from 'react-native-localize';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ASYNC_STORAGE_KEYS } from 'constants/common';
+import en from './locales/en';
+import id from './locales/id';
+import ko from './locales/ko';
+import type { LanguageDetectorAsyncModule } from 'i18next';
+import type { LanguageTypes } from 'types/common';
+
+export const locales = { en, ko, id };
+
+// 디바이스 설정에서 가장 위로 선택된 언어가 현재 디바이스에 적용된 언어. 따라서 배열에 0번째 데이터를 가져옴.
+// 언어 코드를 의미함, ex) 'en', 'ko', 'id', ...
+export const deviceSystemLanguage = getLocales()[0].languageCode;
+
+const languageDetector: LanguageDetectorAsyncModule = {
+  type: 'languageDetector',
+  async: true,
+  detect: callback => {
+    AsyncStorage.getItem(ASYNC_STORAGE_KEYS.language).then(lang => {
+      if (lang) {
+        // AsyncStorage에 저장된 언어가 있으면 해당 언어를 사용
+        callback(lang);
+      }
+
+	  callback(deviceSystemLanguage);
+    });
+    return;
+  },
+  cacheUserLanguage: (language: LanguageTypes) => {
+    AsyncStorage.setItem(ASYNC_STORAGE_KEYS.language, language);
+  },
+};
+
+const i18n = i18next
+  .use(languageDetector)
+  .use(initReactI18next)
+  .init({
+    fallbackLng: 'en',
+    resources: locales,
+    returnObjects: true,
+    react: {
+      useSuspense: false,
+    },
+  });
+
+export default i18n;
+```
+
+<u>앱을 최초로 실행할 때 기기의 시스템 언어를 앱 기본언어로 사용</u>하기 위해, 위와 같이 `languageDetector`를 정의한다.
+
+기본적인 구조는 [`i18next` 공식문서](https://www.i18next.com/misc/creating-own-plugins#languagedetector)를 그대로 참고하였다.
+
+
+
+### 2️⃣ i18next.d.ts
+
+```ts
+import type { locales, deviceSystemLanguage } from './i18n';
+
+declare module 'i18next' {
+  interface CustomTypeOptions {
+    defaultNS: typeof deviceSystemLanguage;
+    resources: (typeof locales)[deviceSystemLanguage];
+  }
+}
+```
+
+위 코드 또한 [`i18next` 공식문서](https://www.i18next.com/overview/typescript)에 작성된 예제 코드를 참고하여 작성하였다.
+
+### 3️⃣.1️⃣ `locales/{{ns}}/translation.json`
+
+```json
+{
+  "TEXT_1": "Text 1",
+  "TEXT_2": "Text 2",
+  "TEXT_3": "Text 3"
+}
+```
+
+`json` 파일에 다국어 텍스트를 전부 작성한다.
+
+나는 전부 1 depth로 작성하였지만, 중첩 객체 형태로 작성하여도 무방하다.
+
+### 3️⃣.2️⃣ `locales/{{ns}}/index.ts`
+
+```ts
+import translation from 'locales/{{ns}}/translation.json';
+
+export default {
+  translation,
+};
+
+```
+
+위와 같이 구성을 하면, 아래와 같이 다국어 텍스트를 사용할 수 있다.
+
+```jsx
+import { useTranslation } from 'react-i18next';
+...
+
+const SomeScreen = () => {
+  const { t } = useTranslation('translation');
+
+  return (
+    <View>
+      <Text>{t('TEXT_1')}</Text>
+      <Text>{t('TEXT_2')}</Text>
+      <Text>{t('TEXT_3')}</Text>
+    </View>
+  );
+};
+```
+## 🚨타입 추론 이슈
+
+
+`i18next.d.ts`가 제대로 작성되지 못한 탓인지, `useTranslation` 훅을 호출할 때 다음과 같은 에러가 발생한다.
+
+```tsx
+const { t } = useTranslation('translation');
+// Type instantiation is excessively deep and possibly infinite.
+```
+
+[`react-i18next` 공식 Issue 란에서 동일한 이슈를 언급한 글](https://github.com/i18next/react-i18next/issues/1417)이 있는데, 거기서는 Typescript의 `recursive type instantiations` 의 상한선이 50 ~ 100이기 때문에, 해당 상한을 초과하는 경우 발생할 수 있는 에러라고 한다.
+
+![](https://i.imgur.com/UL7npQF.png)
+
+
+
+해당 글을 토대로 <u>`translation.json`에 정의된 프로퍼티 수가 너무 많은 것이 문제</u>라고 생각을 하였다.
+
+에러 발생 당시 기준 `translation.json`에는 600개 정도의 프로퍼티가 정의되어 있었다.
+
+<img src="https://i.imgur.com/EjS2E7J.png" />
+
+하지만, 임시로 프로퍼티를 1개만 작성해서 테스트 해 보았는데도 이슈는 해결되지 못했다...
+
+---
+## ✅ 방법 1 (차선)
+
+```ts
+import type { locales, deviceSystemLanguage } from './i18n';
+
+declare module 'i18next' {
+  interface CustomTypeOptions {
+    defaultNS: typeof deviceSystemLanguage;
+    resources: (typeof locales)['en'];
+  }
+}
+```
+
+위와 같이 직접 `'en'` 단일 타입만 전달하면 일단 타입 에러는 해결된다.
+
+하지만, 이 경우 `locales/en/translation.json`에 정의된 프로퍼티 명이 `ko`, `id`의 프로퍼티명과 달라도 에러를 발생시키지 않기 때문에, 좋은 방법이 아니다.
+
+---
+## ✅ 방법 2 (최선)
+
+
+```ts
+import type { locales, deviceSystemLanguage } from './i18n';
+
+type DeviceSystemLangauges = 'en' | 'ko' | 'id';
+
+declare module 'i18next' {
+  interface CustomTypeOptions {
+    defaultNS: typeof deviceSystemLanguage;
+    resources: (typeof locales)[DeviceSystemLangauges];
+  }
+}
+```
+
+
+`i18n.ts`에서 `string`으로 추론되는 `deviceSystemLangauge`을 가져와서 `resources` 타입을 정의하는 것이 아니라, 직접 유니언 타입 `DeviceSystemLangauges`를 정의해서 사용하는 것이다.
+
+이렇게 할 경우 장점은, `locales/{{ns}}/translation.json` 3개의 파일 각각에서 <u>어떤 하나의 프로퍼티라도 다른 프로퍼티와 싱크가 맞지 않는다면, 타입 에러를 발생시킨다</u>는 점이다.
+
+> ### 🤨 만약 기기언어가 `en`, `ko`, `id` 외의 값인 경우에는?
+>
+> <img src="https://i.imgur.com/I5kGz9J.png" />
+>
+> 사진과 같이, `fallbackLng`를 정의한다면 해당 경우를 핸들링할 수 있다.
+

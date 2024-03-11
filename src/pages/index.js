@@ -90,6 +90,9 @@ export const pageQuery = graphql`
     ) {
       edges {
         node {
+          fields {
+            slug
+          }
           frontmatter {
             date(formatString: "YYYY-MM-DD")
             title
@@ -97,7 +100,7 @@ export const pageQuery = graphql`
             draft
             thumbnail
             description
-            slug
+#            slug
           }
         }
       }

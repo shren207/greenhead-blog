@@ -1,0 +1,63 @@
+---
+title: '[React] 메모이제이션 고찰'
+date: 2023-12-12 20:12:80
+category: til
+thumbnail: 'react'
+description: '사수 분께 배운 React에서의 상수 정의 위치.'
+draft: false
+---
+
+import Layout from '/src/templates/blog-post';
+export default Layout;
+
+React를 공부하기 시작했을 무렵, 상수를 다음과 같이 컴포넌트 내부에 `useMemo`를 사용해서 정의해야 최적화에 좀더 유리하다고 생각했다.
+
+```tsx
+import React, { useMemo } from 'react';
+
+const someComponent = () => {
+  const someConstant = useMemo(() => 'some constant', []);
+};
+
+...
+```
+
+하지만 사수분의 코드를 보면, 상수를 정의하는 위치는 컴포넌트 내부가 아닌 외부에 작성하셨고, 이를 군말 없이 따랐던 것 같다.
+
+```tsx
+import React from 'react';
+
+const SOME_CONSTANT = 'some constant';
+
+const someComponent = () => {
+  // some code
+};
+
+...
+```
+
+> 참고로 React 17 버젼 이상부터는 더 이상 명시적으로 React를 import하지 않아도 된다.
+
+
+---
+
+## 🧐 내용 검증
+
+차이를 알고 싶어서, chatGPT로 검색해 보았다.
+
+
+![](https://i.imgur.com/hFCaqlc.png)
+
+
+즉, 외부, 내부 구분에서 변수 선언하는 것은 실제로도 렌더링 측면에서 차이가 있었던 것이다...
+
+**But**, 모든 값, 함수를 컴포넌트 외부로 빼내서 최적화를 꾀하려고 하는 경우, [미성숙한 최적화(premature optimization)](https://stackify.com/premature-optimization-evil/) 모순에 빠질 우려가 있기 때문에 주의해야 한다.
+
+실제로도 [스택오버플로우](https://stackoverflow.com/questions/62848106/functional-component-write-functions-inside-or-outside-the-component) 답변한 사람이 다음과 같이 말했기도 했다.
+
+![](https://i.imgur.com/oW8fZDm.png)
+
+> "첫 번째 옵션(컴포넌트 내부에 함수 정의)은 렌더링할 때마다 함수를 정의하기 때문에, 일부 사람들은 이를 보고 성능이 떨어진다고 주장합니다."
+>
+> (하지만) 그러한 경우는 [premature optimization](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwi39cGIh8XqAhXXaRUIHacEA2cQFjABegQIDBAE&url=https%3A%2F%2Fstackify.com%2Fpremature-optimization-evil%2F&usg=AOvVaw1lvwXXDmbMKHnPU2N8D8n2)입니다. 해당 내용과 관련이 있는 [JavaScript closures performance](https://stackoverflow.com/questions/14974811/javascript-closures-performance) 문서를 참고해 보세요."
+

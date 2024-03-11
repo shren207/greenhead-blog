@@ -5,7 +5,7 @@ import { rhythm } from '../utils/typography'
 import * as Lang from '../constants'
 
 export default ({ data }) => {
-  const resumes = data.allMarkdownRemark.edges
+  const resumes = data.allMdx.edges
 
   const resume = resumes
     .filter(({ node }) => node.frontmatter.lang === Lang.ENGLISH)
@@ -22,23 +22,23 @@ export default ({ data }) => {
         )}`,
       }}
     >
-      <div dangerouslySetInnerHTML={{ __html: resume.html }} />
+      {/*<div dangerouslySetInnerHTML={{ __html: resume.html }} />*/}
     </div>
   )
 }
 
 export const pageQuery = graphql`
   query {
-    allMarkdownRemark(filter: { frontmatter: { category: { eq: null } } }) {
+    allMdx(filter: { frontmatter: { category: { eq: null } } }) {
       edges {
         node {
           id
           excerpt(pruneLength: 160)
-          html
+          body
           frontmatter {
             title
             date(formatString: "MMMM DD, YYYY")
-            lang
+#            lang
           }
         }
       }

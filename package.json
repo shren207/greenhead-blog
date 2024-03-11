@@ -4,6 +4,7 @@
   "description": "Greenhead 개발 블로그",
   "version": "0.1.0",
   "dependencies": {
+    "@mdx-js/react": "^2.3.0",
     "gatsby": "^5.13.1",
     "gatsby-image": "^3.11.0",
     "gatsby-plugin-feed": "^5.13.1",
@@ -13,7 +14,9 @@
     "gatsby-plugin-image": "^3.13.1",
     "gatsby-plugin-lodash": "^6.13.1",
     "gatsby-plugin-manifest": "^5.13.1",
+    "gatsby-plugin-mdx": "^5.13.1",
     "gatsby-plugin-offline": "^6.13.1",
+    "gatsby-plugin-page-creator": "^5.13.1",
     "gatsby-plugin-robots-txt": "^1.8.0",
     "gatsby-plugin-sass": "^6.13.1",
     "gatsby-plugin-sharp": "^5.13.1",

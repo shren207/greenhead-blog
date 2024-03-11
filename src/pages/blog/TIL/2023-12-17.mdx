@@ -1,0 +1,64 @@
+---
+title: '[React] RHF의 "isDirty"'
+date: 2023-12-17 15:12:42
+category: til
+thumbnail: 'rhf'
+description: 'React Hook Form의 "isDirty" 프로퍼티를 알아보자.'
+draft: false
+---
+
+import Layout from '/src/templates/blog-post';
+export default Layout;
+
+React Hook Form(이하 RHF)는 `isDirty`라는 프로퍼티를 제공한다.
+
+`isDirty`는 **실시간 유효성 검사**를 적용할 때, <i>유저가 아무런 입력도 하지 않았을 때는 유효성 검사를 하지 않도록 할 때</i> 유용하다.
+
+
+![](https://i.imgur.com/EbLfPK8.png)
+> <i>아무것도 입력하지 않았는데 이런 식으로 나온다면 상당히 당황스러울 것이다.. 😱</i>
+
+
+`isDirty`는 `formState`에서 제공하는 것과, `fieldState`에서 제공하는 것 2가지가 있다.
+
+
+- 1️⃣ `formState.isDirty` : <u>폼 내부의 필드 중 하나라도 수정되었는지</u>의 여부
+- 2️⃣ `fieldState.isDirty` : <u>특정 필드가 수정되었는지</u>의 여부
+
+---
+
+## 1️⃣ formState.isDirty
+
+```bash
+- <Form>
+  - <Input1>
+  - <Input2>
+  - <Input3>
+```
+
+위와 같은 컴포넌트 구조로 폼이 구성되어 있다고 해 보자.
+
+
+* `useForm` 훅은 부모 컴포넌트인 `<Form>`에서 호출.
+* 각각의 `Input` 컴포넌트는 `<Controller>` 컴포넌트를 통한 HOC 방식으로 렌더링됨.
+
+
+![](https://i.imgur.com/n9cfHHQ.png)
+
+`useForm`은 특정 필드의 상태를 나타내는 `fieldState`가 아닌, 필드의 상태를 나타내는 `formState`만을 반환하기 때문에, 특정 필드의 `isDirty`, `isValid` 등을 확인하기는 어렵다.
+
+## 2️⃣ fieldState.isDirty
+
+![](https://i.imgur.com/A1Lohoj.png)
+
+`fieldState`의 `isDirty`를 참조하고 싶다면, `<Controller>`의 `render` 속성에서 참조할 수 있다!
+
+하지만 이 경우, `render` 속성에 전달하는 콜백 함수의 `return` 문 내부에서만 참조할 수 있기 때문에, <u>`return` 문 외부에서 해당 값을 참조하여 로직을 작성하는 것은 불가능</u>하다.
+
+`useController` 훅을 사용하면 이러한 문제를 해결할 수 있다.
+
+
+![](https://i.imgur.com/4ennpLK.png)
+
+1. 부모(상위) 컴포넌트에서 호출된 `useForm`의 반환값 중 하나인 `control`을 자식 컴포넌트의 prop으로 넘겨준다.
+2. `control`을 넘겨받은, input으로 사용될 자식 컴포넌트에서 `useController`를 호출하고, 인자로 `control`을 넘겨준다.

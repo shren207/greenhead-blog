@@ -1,0 +1,124 @@
+---
+title: 'Unity WebGL (+ React)'
+date: 2023-12-14 22:12:05
+category: til
+thumbnail: 'unity'
+description: 'Unity WebGL을 React 프로젝트에 통합하는 방법과, 그 한계를 알아보자.'
+draft: false
+---
+
+import Layout from '/src/templates/blog-post';
+export default Layout;
+
+
+![](https://i.imgur.com/vyqq68x.png)
+
+Unity는 여러가지 export 방식을 지원하는데, 그중 WebGL 형식도 있다. 이를 사용하면 브라우저에서 Unity 엔진으로 개발된 어플리케이션을 실행할 수 있다.
+
+![](https://i.imgur.com/Dj2mrRc.png)
+
+WebGL 방식으로 Unity 프로젝트를 export하면 위 사진과 같은 구성을 갖는다.
+
+```
+- Build
+- dist
+- index.html
+- StreamingAssets
+- TemplateData
+```
+
+위 구조를 보면 알 수 있듯, Unity WebGL 형식으로 export된 HTML 파일은 추가적인 리소스를 필요로 한다.
+
+CORS 정책에 의해서 <u>웹에서 로컬 파일에 접근하는 것은 불가능</u>하기 때문에, 웹서버를 통해 호스팅해야 한다.
+
+![](https://i.imgur.com/MgWOwv5.png)
+
+> index.html 파일을 더블클릭해서 그냥 열려고 하면 위와 같이 에러가 발생할 것이다.
+
+
+docker를 사용해서 `nginx` 혹은 `apache` 웹서버를 열 수도 있겠지만, 여기서는 굳이 필요없으니까 간단하게 [http-server](https://github.com/http-party/http-server)를 사용해서 웹서버를 열어보자.
+
+<u>`index.html` 파일이 위치한 경로</u>에서, 터미널에 다음 명령어를 입력한다.
+
+```
+$ yarn global add http-server # 이미 설치되어 있는 경우는 해당 명령어 생략
+$ http-server -p 8000
+```
+
+![](https://i.imgur.com/yJfPzlY.png)
+
+`localhost:8000` 으로 접속하면 위 사진과 같이 정상적으로 실행되는 것을 확인할 수 있으며, Unity 화면은 `id`가 `unity-canvas`인 HTML `<canvas>` 태그로 렌더링되는 것을 확인할 수 있다.
+
+
+## 📦react-unity-webgl 라이브러리란?
+
+![](https://i.imgur.com/XhtdIh8.png)
+
+Unity ↔️ Browser 간 인터렉션을 원하는 경우, 로직을 Unity 뿐만 아니라 웹 쪽에서도 처리할 필요가 있을 것이다.
+
+이럴 때 `index.html`에 직접 바닐라 코드를 작성하는 것은 상당히 불편할 수 있다.
+
+[react-unity-webgl](https://github.com/jeffreylanters/react-unity-webgl) 라이브러리는 React 어플리케이션 내에서 Unity WebGL 프로젝트를 쉽게 통합할 수 있도록 돕는다.
+
+
+```tsx
+import { Unity, useUnityContext } from 'react-unity-webgl';
+
+function App() {
+  const {unityProvider, sendMessage} = useUnityContext({
+    loaderUrl: '/unity/Build/webglrecordtest.loader.js',
+    dataUrl: '/unity/Build/webglrecordtest.data',
+    frameworkUrl: '/unity/Build/webglrecordtest.framework.js',
+    codeUrl: '/unity/Build/webglrecordtest.wasm',
+  })
+
+  return (
+    <div style={{display: 'flex', flexDirection: 'column', width: '1000px', rowGap: '10px'}}>
+      <Unity unityProvider={unityProvider} style={{width: '100%', height: '500px'}} />
+      <button onClick={() => sendMessage('WebGLTest', 'UnityStartRecording')}>StartRecording</button>
+      <button onClick={() => sendMessage('WebGLTest', 'UnityStopRecording')}>StopRecording</button>
+      <button onClick={() => sendMessage('WebGLTest', 'UnityDownloadFile')}>DownloadFile</button>
+      <button onClick={() => sendMessage('WebGLTest', 'UnityNoAudio')}>NoAudio</button>
+    </div>
+  );
+}
+
+export default App;
+```
+
+위와 같은 방식으로 Unity를 React 프로젝트에 통합할 수 있다.
+
+![](https://i.imgur.com/e0s91nY.png)
+
+
+![](https://i.imgur.com/YhGBwgz.png)
+
+
+`<Unity>` 컴포넌트는 `id`로 `react-unity-webgl-canvas2`를 갖는 HTML `<canvas>` 태그로 렌더링되는 것을 확인할 수 있다.
+
+
+## 🚨 react-unity-webgl을 사용할 때의 문제점
+
+
+react-unity-webgl은 분명 React 어플리케이션에 Unity WebGL 프로젝트를 쉽게 통합할 수 있도록 해 주는 강력한 라이브러리라고 생각한다.
+
+하지만, Unity 프로젝트에 외부 script를 포함되어 있는 경우가 문제가 된다.
+
+![](https://i.imgur.com/WDhYpKb.png)
+
+내가 사용한 Unity 빌드파일의 index.html은 위 사진과 같이 `<script>` 태그를 사용해서 외부 JS 파일을 로드해오고 있는 것을 확인할 수 있다.
+
+![](https://i.imgur.com/Q9SLnCK.png)
+
+이때, `index.html`을 그냥 실행시키면 정상적으로 외부 스크립트를 로드해오는 것을 확인할 수 있다.
+
+![](https://i.imgur.com/CxeLuob.png)
+
+그런데, `react-unity-webgl`을 라이브러리를 통해 React와 통합해서 사용하는 경우, 위 사진처럼 `index.html`에 명시된 외부 스크립트를 불러오지 못한다!!
+
+이를 해결해보려고, unity에서 만들어진 `index.html`이 아닌, react 프로젝트의 유일한 `index.html`에 해당 스크립트를 추가해도 (경로는 올바르게 수정) 정상적으로 동작하지 않는다.
+
+## 📝 결론
+
+Unity가 외부 스크립트를 사용하지 않는다면, react-unity-webgl을 사용해서 react로 빠르게 개발하고, 만약 사용한다면 Unity의 `index.html` 파일 내부에 직접 인터렉션과 관련된 로직을 직접 작성해야 할 것 같다.
+

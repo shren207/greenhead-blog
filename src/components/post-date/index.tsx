@@ -1,10 +1,10 @@
 import React, { FC } from 'react'
-import './index.scss'
+import styles from './index.module.scss'
 
 interface PostDateProps {
   date: string
 }
 
 export const PostDate: FC<PostDateProps> = ({ date }) => {
-  return <p className="post-date">{date}</p>
+  return <p className={styles.postDate}>{date}</p>
 }

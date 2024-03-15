@@ -14,7 +14,11 @@ export function getValueFrom(storage: Storage | null, key: string): any {
   return JSON.parse(rawData);
 }
 
-export function setValueTo(storage: Storage | null, key: string, data: any): void {
+export function setValueTo(
+  storage: Storage | null,
+  key: string,
+  data: any
+): void {
   if (isEmpty(storage)) {
     return;
   }

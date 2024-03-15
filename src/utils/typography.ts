@@ -1,7 +1,9 @@
 import Typography from 'typography';
 import GitHubTheme from 'typography-theme-github';
 
-GitHubTheme.overrideThemeStyles = (): { [key: string]: Partial<CSSStyleDeclaration>} => {
+GitHubTheme.overrideThemeStyles = (): {
+  [key: string]: Partial<CSSStyleDeclaration>;
+} => {
   return {
     a: {
       boxShadow: `none`,

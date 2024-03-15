@@ -1,14 +1,13 @@
-import React from 'react'
-import { StaticQuery, graphql, Link } from 'gatsby'
-import Image from 'gatsby-image'
+import { StaticQuery, graphql } from 'gatsby';
+import Image from 'gatsby-image';
 
-import './index.scss'
+import './index.scss';
 
 export const Bio = () => (
   <StaticQuery
     query={bioQuery}
-    render={data => {
-      const { author, social, introduction } = data.site.siteMetadata
+    render={(data) => {
+      const { author, social, introduction } = data.site.siteMetadata;
 
       return (
         <div className="bio">
@@ -26,7 +25,7 @@ export const Bio = () => (
                 <span className="author-name-prefix">Written by</span>
                 {/*! resume 영역*/}
                 {/*<Link to={'/about'} className="author-name-content">*/}
-                  <span className="author-name-content">@{author}</span>
+                <span className="author-name-content">@{author}</span>
                 {/*</Link>*/}
                 <div className="author-introduction">{introduction}</div>
                 <p className="author-socials">
@@ -61,10 +60,10 @@ export const Bio = () => (
             </div>
           </div>
         </div>
-      )
+      );
     }}
   />
-)
+);
 
 const bioQuery = graphql`
   query BioQuery {
@@ -90,6 +89,6 @@ const bioQuery = graphql`
       }
     }
   }
-`
+`;
 
-export default Bio
+export default Bio;

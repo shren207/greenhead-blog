@@ -21,7 +21,7 @@ export function toFit(
 
   let tick = false;
 
-  return function() {
+  return function () {
     if (tick) {
       return;
     }

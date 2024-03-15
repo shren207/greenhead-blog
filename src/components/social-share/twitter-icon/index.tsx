@@ -1,8 +1,8 @@
-import React, { FC } from 'react'
-import './index.scss'
+import type { FC } from 'react';
+import './index.scss';
 
 interface TwitterIconProps {
-  onClick: (args: any) => any
+  onClick: (args: any) => any;
 }
 
 export const TwitterIcon: FC<TwitterIconProps> = ({ onClick }) => (
@@ -25,4 +25,4 @@ export const TwitterIcon: FC<TwitterIconProps> = ({ onClick }) => (
       <span className="service-label">Share on Twitter</span>
     </div>
   </a>
-)
+);

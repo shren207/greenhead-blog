@@ -1,15 +1,15 @@
-import React from 'react'
+import type { FC } from 'react';
 
 interface HTMLProps {
-  htmlAttributes: object,
-  headComponents: Array<any>,
-  bodyAttributes: object,
-  preBodyComponents: Array<any>,
-  body: string,
-  postBodyComponents: Array<any>,
+  htmlAttributes: object;
+  headComponents: Array<any>;
+  bodyAttributes: object;
+  preBodyComponents: Array<any>;
+  body: string;
+  postBodyComponents: Array<any>;
 }
 
-const HTML: React.FC<HTMLProps> = (props) => {
+const HTML: FC<HTMLProps> = (props) => {
   return (
     <html {...props.htmlAttributes}>
       <head>
@@ -25,14 +25,14 @@ const HTML: React.FC<HTMLProps> = (props) => {
         {props.preBodyComponents}
         <noscript>You need to enable JavaScript to run this app.</noscript>
         <div
-          key={`body`}
+          key="body"
           id="___gatsby"
           dangerouslySetInnerHTML={{ __html: props.body }}
         />
         {props.postBodyComponents}
       </body>
     </html>
-  )
-}
+  );
+};
 
 export default HTML;

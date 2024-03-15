@@ -1,8 +1,7 @@
-import React from 'react'
-import Resume from '/content/__about/resume.mdx'
-import { rhythm } from '../utils/typography'
+import Resume from '/content/__about/resume.mdx';
+import { rhythm } from '../utils/typography';
 
-export default function About () {
+export default function About() {
   return (
     <div
       style={{
@@ -16,5 +15,5 @@ export default function About () {
     >
       <Resume />
     </div>
-  )
+  );
 }

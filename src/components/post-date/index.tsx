@@ -1,13 +1,13 @@
-import React, { FC } from 'react'
-import classNames from 'classnames/bind'
-import styles from './index.module.scss'
+import classNames from 'classnames/bind';
+import styles from './index.module.scss';
+import type { FC } from 'react';
 
-const cx = classNames.bind(styles)
+const cx = classNames.bind(styles);
 
 interface PostDateProps {
-  date: string
+  date: string;
 }
 
 export const PostDate: FC<PostDateProps> = ({ date }) => {
-  return <p className={cx('container')}>{date}</p>
-}
+  return <p className={cx('container')}>{date}</p>;
+};

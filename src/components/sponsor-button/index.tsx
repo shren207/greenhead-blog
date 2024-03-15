@@ -1,11 +1,11 @@
-import React, { FC } from 'react'
-import './index.scss'
+import type { FC } from 'react';
+import './index.scss';
 
 interface SponsorButtonProps {
-  sponsorId: string
+  sponsorId: string;
 }
 
-export const SponsorButton: FC<SponsorButtonProps>  = ({ sponsorId }) => (
+export const SponsorButton: FC<SponsorButtonProps> = ({ sponsorId }) => (
   <div className="sponsor-button">
     <a
       className="bmc-button"
@@ -20,4 +20,4 @@ export const SponsorButton: FC<SponsorButtonProps>  = ({ sponsorId }) => (
       <span>Buy me a coffee</span>
     </a>
   </div>
-)
+);

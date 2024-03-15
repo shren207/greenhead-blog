@@ -42,11 +42,27 @@ Amazon ECR > 프라이빗 레지스트리 > 리포지토리 항목으로 들어�
 
 ### 2. Github Actions를 위한 AWS IAM 계정 생성
 
-Github Actions가 AWS 리소스에 접근하기 위해서는, AWS IAM 서비스 계정을 생성하여 해당 계정에 권한을 부여해야 한다.
+Github Actions가 AWS 리소스에 접근할 수 있도록 하기 위해, AWS 공식 Actions인 [configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials)를 사용할 것이다.
+
+`configure-aws-credentials`는 다음 3가지 값을 with 필드 내부에 정의하여야 한다.
+- `aws-access-key-id`
+- `aws-secret-access-key`
+- `aws-region`
+
+나의 경우 서울 리전을 사용하고 있으므로 `aws-region`에 `ap-northeast-2`를 입력해주면 된다.
+
+그렇다면 <u>`aws-access-key-id`, `aws-secret-access-key`는 어디서 가져올까?</u> 🤔
+
+이 값을 생성하기 위해, Github Actions를 위한 IAM 계정을 생성할 필요가 있다.
+
+
+
+[//]: # (Github Actions가 AWS ECR의 리소스에 접근할 수 있도록 하기 위해, AWS 공식 Actions인 [amazon-ecr-login]&#40;https://github.com/aws-actions/amazon-ecr-login&#41;을 사용할 것이다.)
+
+[//]: # (Github Actions가 AWS 리소스에 접근하기 위해서는, AWS IAM 서비스 계정을 생성하여 해당 계정에 권한을 부여해야 한다.)
 
 [//]: # (### 2. Github Actions 워크플로우 작성)
 
-[//]: # ()
 [//]: # (이제, Github Actions를 이용하여 도커 이미지를 빌드하고 ECR에 업로드하는 워크플로우를 작성해보자.)
 
 

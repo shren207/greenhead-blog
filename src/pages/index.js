@@ -1,50 +1,50 @@
-import { graphql } from 'gatsby'
-import _ from 'lodash'
-import React, { useMemo } from 'react'
-import { Bio } from '../components/bio'
-import { Category } from '../components/category'
-import { Contents } from '../components/contents'
-import { Head } from '../components/head'
-import { HOME_TITLE } from '../constants'
-import { useCategory } from '../hooks/useCategory'
-import { useIntersectionObserver } from '../hooks/useIntersectionObserver'
-import { useRenderedCount } from '../hooks/useRenderedCount'
-import { useScrollEvent } from '../hooks/useScrollEvent'
-import { Layout } from '../layout'
-import * as Dom from '../utils/dom'
-import * as EventManager from '../utils/event-manager'
+import { useMemo } from 'react';
+import { graphql } from 'gatsby';
+import _ from 'lodash';
+import { Bio } from '../components/bio';
+import { Category } from '../components/category';
+import { Contents } from '../components/contents';
+import { Head } from '../components/head';
+import { HOME_TITLE } from '../constants';
+import { useCategory } from '../hooks/useCategory';
+import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
+import { useRenderedCount } from '../hooks/useRenderedCount';
+import { useScrollEvent } from '../hooks/useScrollEvent';
+import { Layout } from '../layout';
+import * as Dom from '../utils/dom';
+import * as EventManager from '../utils/event-manager';
 
-const BASE_LINE = 80
+const BASE_LINE = 80;
 
 function getDistance(currentPos) {
-  return Dom.getDocumentHeight() - currentPos
+  return Dom.getDocumentHeight() - currentPos;
 }
 
 export default function Pages({ data, location }) {
-  const { siteMetadata } = data.site
-  const { countOfInitialPost } = siteMetadata.configs
+  const { siteMetadata } = data.site;
+  const { countOfInitialPost } = siteMetadata.configs;
 
-  const posts = data.allMdx.edges
+  const posts = data.allMdx.edges;
 
   const categories = useMemo(
     () => _.uniq(posts.map(({ node }) => node.frontmatter.category)),
     []
-  )
-  const [count, countRef, increaseCount] = useRenderedCount()
-  const [category, selectCategory] = useCategory()
+  );
+  const [count, countRef, increaseCount] = useRenderedCount();
+  const [category, selectCategory] = useCategory();
 
-  useIntersectionObserver()
+  useIntersectionObserver();
   useScrollEvent(() => {
-    const currentPos = window.scrollY + window.innerHeight
-    const isTriggerPos = () => getDistance(currentPos) < BASE_LINE
+    const currentPos = window.scrollY + window.innerHeight;
+    const isTriggerPos = () => getDistance(currentPos) < BASE_LINE;
     const doesNeedMore = () =>
-      posts.length > countRef.current * countOfInitialPost
+      posts.length > countRef.current * countOfInitialPost;
 
     return EventManager.toFit(increaseCount, {
       dismissCondition: () => !isTriggerPos(),
       triggerCondition: () => isTriggerPos() && doesNeedMore(),
-    })()
-  })
+    })();
+  });
 
   return (
     <Layout location={location} title={siteMetadata.title}>
@@ -62,9 +62,8 @@ export default function Pages({ data, location }) {
         category={category}
       />
     </Layout>
-  )
+  );
 }
-
 
 //! 수정한 query: data(년-월-일), excerpt(prunLength: 200 -> 90) // 미리보기 글자 수
 export const pageQuery = graphql`
@@ -78,7 +77,7 @@ export const pageQuery = graphql`
       }
     }
     allMdx(
-      sort:  { frontmatter: { date: DESC } }
+      sort: { frontmatter: { date: DESC } }
       filter: { frontmatter: { category: { ne: null }, draft: { eq: false } } }
     ) {
       edges {
@@ -98,4 +97,4 @@ export const pageQuery = graphql`
       }
     }
   }
-`
+`;

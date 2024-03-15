@@ -5,7 +5,7 @@ export const shareToFacebook = (href: string, text: string): void => {
     href,
     quote: text,
   });
-}
+};
 
 export const shareToTwitter = (href: string, text: string): void => {
   window.open(
@@ -13,4 +13,4 @@ export const shareToTwitter = (href: string, text: string): void => {
     'sharer',
     'toolbar=0,status=0,width=626,height=436'
   );
-}
+};

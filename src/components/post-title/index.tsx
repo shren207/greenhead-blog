@@ -1,7 +1,7 @@
-import React, { FC } from 'react'
+import type { FC } from 'react';
 
 interface PostTitleProps {
-  title: string
+  title: string;
 }
 
-export const PostTitle: FC<PostTitleProps> = ({ title }) => <h1>{title}</h1>
+export const PostTitle: FC<PostTitleProps> = ({ title }) => <h1>{title}</h1>;

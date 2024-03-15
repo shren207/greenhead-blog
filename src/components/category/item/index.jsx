@@ -1,18 +1,18 @@
-import React, { useRef, useCallback, useEffect } from 'react'
+import { useRef, useCallback, useEffect } from 'react';
 
 export const Item = ({ title, selectedCategory, onClick, scrollToCenter }) => {
-  const tabRef = useRef(null)
+  const tabRef = useRef(null);
 
   const handleClick = useCallback(() => {
-    scrollToCenter(tabRef)
-    onClick(title)
-  }, [tabRef])
+    scrollToCenter(tabRef);
+    onClick(title);
+  }, [onClick, scrollToCenter, title]);
 
   useEffect(() => {
     if (selectedCategory === title) {
-      scrollToCenter(tabRef)
+      scrollToCenter(tabRef);
     }
-  }, [selectedCategory, tabRef])
+  }, [selectedCategory, tabRef]);
 
   return (
     <li
@@ -23,5 +23,5 @@ export const Item = ({ title, selectedCategory, onClick, scrollToCenter }) => {
     >
       <div onClick={handleClick}>{title}</div>
     </li>
-  )
-}
+  );
+};

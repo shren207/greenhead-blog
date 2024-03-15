@@ -1,11 +1,12 @@
-import React, { ReactNode, memo } from 'react'
+import { memo } from 'react';
+import type { ReactNode, FC } from 'react';
 
-import './index.scss'
+import './index.scss';
 
 interface ThumbnailContainerProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
-export const ThumbnailContainer: React.FC<ThumbnailContainerProps> = memo(({ children }) => (
-  <div className="thumbnail-container">{children}</div>
-));
+export const ThumbnailContainer: FC<ThumbnailContainerProps> = memo(
+  ({ children }) => <div className="thumbnail-container">{children}</div>
+);

@@ -1,54 +1,54 @@
-import { useEffect, useState, useCallback } from 'react'
-import qs from 'query-string'
-import { CATEGORY_TYPE } from '../constants'
-import * as ScrollManager from '../utils/scroll'
+import { useEffect, useState, useCallback } from 'react';
+import qs from 'query-string';
+import { CATEGORY_TYPE } from '../constants';
+import * as ScrollManager from '../utils/scroll';
 
-const DEST_POS = 316
+const DEST_POS = 316;
 
 export function useCategory() {
-  const [category, setCategory] = useState(CATEGORY_TYPE.ALL)
+  const [category, setCategory] = useState(CATEGORY_TYPE.ALL);
   const adjustScroll = () => {
     if (window.scrollY > DEST_POS) {
-      ScrollManager.go(DEST_POS)
+      ScrollManager.go(DEST_POS);
     }
-  }
+  };
   const selectCategory = useCallback((category: string) => {
-    setCategory(category)
-    adjustScroll()
+    setCategory(category);
+    adjustScroll();
     window.history.pushState(
       { category },
       '',
       `${window.location.pathname}?${qs.stringify({ category })}`
-    )
-  }, [])
+    );
+  }, []);
   const changeCategory = useCallback((withScroll = true) => {
-    const { category } = qs.parse(location.search)
-    const target = category == null ? CATEGORY_TYPE.ALL : category
+    const { category } = qs.parse(location.search);
+    const target = category == null ? CATEGORY_TYPE.ALL : category;
 
-    setCategory(target as string)
+    setCategory(target as string);
     if (withScroll) {
-      adjustScroll()
+      adjustScroll();
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    ScrollManager.init()
+    ScrollManager.init();
     return () => {
-      ScrollManager.destroy()
-    }
-  }, [])
+      ScrollManager.destroy();
+    };
+  }, []);
 
   useEffect(() => {
-    window.addEventListener('popstate', () => changeCategory)
+    window.addEventListener('popstate', () => changeCategory);
 
     return () => {
-      window.removeEventListener('popstate', () => changeCategory)
-    }
-  }, [])
+      window.removeEventListener('popstate', () => changeCategory);
+    };
+  }, []);
 
   useEffect(() => {
-    changeCategory(false)
-  }, [])
+    changeCategory(false);
+  }, []);
 
-  return [category, selectCategory]
+  return [category, selectCategory];
 }

@@ -1,0 +1,91 @@
+{
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint", "react", "react-hooks", "import"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:prettier/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "rules": {
+    "prettier/prettier": ["warn", { "endOfLine": "auto", "semi": true }, { "usePrettierrc": true }],
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off",
+    "react/display-name": "off",
+    "no-unused-vars": "off",
+    "no-console": "warn",
+    "@typescript-eslint/no-var-requires": 0,
+    "@typescript-eslint/no-unused-vars": ["warn"],
+    "@typescript-eslint/consistent-type-imports": ["warn"],
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "react/jsx-curly-brace-presence": [1, { "props": "never", "children": "never" }],
+    "import/order": [
+      "warn",
+      {
+        "pathGroups": [
+          {
+            "pattern": "react*",
+            "group": "external",
+            "position": "before"
+          },
+          {
+            "pattern": "components/**",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "layouts/**",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "constants/**",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "utils",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "utils/**",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "*",
+            "group": "internal",
+            "position": "before"
+          }
+        ],
+        "pathGroupsExcludedImportTypes": ["builtin", "type"],
+        "groups": [
+          "external",
+          "internal",
+          "builtin",
+          ["parent", "sibling", "index"],
+          "type"
+        ],
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        }
+      }
+    ]
+  }
+}

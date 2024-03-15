@@ -1,6 +1,4 @@
-import React from 'react'
-
-import './index.scss'
+import './index.scss';
 
 export const FacebookIcon = ({ onClick }) => (
   <a
@@ -23,4 +21,4 @@ export const FacebookIcon = ({ onClick }) => (
       <span className="service-label">Share on Facebook</span>
     </div>
   </a>
-)
+);

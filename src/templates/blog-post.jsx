@@ -9,11 +9,12 @@ import { PostDate } from '../components/post-date'
 import { Bio } from '../components/bio'
 import { PostNavigator } from '../components/post-navigator'
 import { Utterances } from '../components/utterances'
+import { Callout } from '../components/mdx/callout'
 import * as ScrollManager from '../utils/scroll'
 import '../styles/code.scss'
 import 'katex/dist/katex.min.css'
 
-const shortcodes = { Link }
+const shortcodes = { Link, Callout }
 
 export default function PageTemplate ({  pageContext, location, children }) {
   const queryForSiteMetaData = useStaticQuery(graphql`

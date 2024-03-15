@@ -1,0 +1,15 @@
+.container {
+  padding: 1rem 2rem;
+  margin: 1.5rem auto;
+  border-left: 0.5rem solid black;
+  background-color: blue;
+  border-radius: 0.5rem;
+
+  &.warning {
+    border-left-color: rgb(119, 32, 115);
+  }
+
+  &.error {
+    border-left-color: red;
+  }
+}

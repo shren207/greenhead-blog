@@ -3,8 +3,8 @@ title: "[K8S] 프론트엔드 개발자의 EKS 경험기 2️⃣"
 date: 2024-03-04 14:03:60
 category: til
 thumbnail: 'k8s'
-description: '도커 이미지 AWS ECR에 업로드하기'
-draft: true
+description: '빌드한 이미지를 AWS ECR에 업로드해보자.'
+draft: false
 ---
 
 import Layout from '/src/templates/blog-post';
@@ -40,11 +40,16 @@ Amazon ECR > 프라이빗 레지스트리 > 리포지토리 항목으로 들어�
 
 그렇다면 정상적으로 `greenhead-blog`라는 이름의 ECR 프라이빗 레포지토리가 생성된 것을 확인할 수 있다.
 
+---
 ### 2. Github Actions를 위한 AWS IAM 계정 생성
 
-Github Actions가 AWS 리소스에 접근할 수 있도록 하기 위해, AWS 공식 Actions인 [configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials)를 사용할 것이다.
+Github Actions가 <u>1️⃣AWS 리소스에 접근할 수 있도록</u> 하고, <u>2️⃣AWS ECR에 이미지를 업로드할 수 있도록</u> 하기 위해, 2개의 AWS 공식 Actions를 사용할 것이다.
+- 1️⃣ [configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials)
+- 2️⃣ [amazon-ecr-login](https://github.com/aws-actions/amazon-ecr-login)
 
-`configure-aws-credentials`는 다음 3가지 값을 with 필드 내부에 정의하여야 한다.
+[//]: # (Github Actions가 AWS 리소스에 접근할 수 있도록 하기 위해, AWS 공식 Actions인 [configure-aws-credentials]&#40;https://github.com/aws-actions/configure-aws-credentials&#41;를 사용할 것이다.)
+
+`configure-aws-credentials`는 다음 3가지 값을 `with` 필드 내부에 정의하여야 한다.
 - `aws-access-key-id`
 - `aws-secret-access-key`
 - `aws-region`
@@ -55,15 +60,283 @@ Github Actions가 AWS 리소스에 접근할 수 있도록 하기 위해, AWS �
 
 이 값을 생성하기 위해, Github Actions를 위한 IAM 계정을 생성할 필요가 있다.
 
+<Callout variant="info">
+  <b>🤔 IAM 계정이란?</b>
 
-[//]: # (Github Actions가 AWS ECR의 리소스에 접근할 수 있도록 하기 위해, AWS 공식 Actions인 [amazon-ecr-login]&#40;https://github.com/aws-actions/amazon-ecr-login&#41;을 사용할 것이다.)
-
-[//]: # (Github Actions가 AWS 리소스에 접근하기 위해서는, AWS IAM 서비스 계정을 생성하여 해당 계정에 권한을 부여해야 한다.)
-
-[//]: # (### 2. Github Actions 워크플로우 작성)
-
-[//]: # (이제, Github Actions를 이용하여 도커 이미지를 빌드하고 ECR에 업로드하는 워크플로우를 작성해보자.)
+  IAM은 <u>Identity and Access Management</u>의 약자로, 말 그대로 신원과 권한을 관리하는 방식을 의미한다.
+  <br />
 
 
+  AWS는 <u>1️⃣root 계정</u>과 <u>2️⃣IAM 계정</u>, 2개 유형의 계정을 제공한다.
+
+  root 계정은 모든 권한을 소유한 계정으로, 계정 정보를 변경한다든지, 조직 내 IAM 계정의 권한을 수정한다든지 등의 작업은 오직 root 계정만이 가능하다.
+  하지만 그만큼 권한이 막강하기 때문에, 만에 하나 탈취되는 경우 아주 큰 문제가 된다.
+  <br />
+
+  이를 해결하기 위해 <b>IAM 계정</b>을 사용한다. IAM 계정은 오직 부여받은 권한에 해당하는 작업만 수행할 수 있기 때문에, 조직 내 특정 IAM 계정이 탈취당하더라도 root 계정이 탈취당하는 경우에 비해서는 피해 규모가 훨씬 작다.
+  <br />
+
+  같은 이유로, 이번 포스트에서도 Github Actions가 정상적으로 동작하기 위해 필요한 최소한의 권한만을 갖는 IAM 계정을 생성하여 사용한다면 보안 측면에서 더 안전하다.
+</Callout>
+
+![](https://i.imgur.com/gADbIdL.png)
+
+AWS 콘솔에 접속하여 `IAM` 서비스로 이동 후, `사용자 생성` 버튼을 클릭한다.
+
+![](https://i.imgur.com/kml4Zfg.png)
+
+IAM 계정 사용자 이름을 입력하고, `AWS Management Console에 대한 사용자 액세스 권한 제공` 옵션은 <u>체크하지 않는다</u>.
+
+<b>AWS Management Console</b>, 즉 <u>GUI에 대한 접근 권한</u>은 단순 스크립트 실행만 수행하는 Github Actions에게는 필요 없는 권한이기 때문이다.
+
+[//]: # (![]&#40;https://i.imgur.com/3Z3Z3Zv.png&#41;)
+
+이후 해당 IAM 계정에게 부여할 권한을 설정해야 한다. 이를 위해 아까 위에서 언급하였던 AWS Actions 중 [amazon-ecr-login](https://github.com/aws-actions/amazon-ecr-login)의 `README.md`를 참고해보자.
+
+![](https://i.imgur.com/TjkcDmt.png)
+
+문서를 보면 `GetAuthorizationToken`, `AllowPushPull` 2개로 그룹으로 나누긴 했지만 전부 ECR에 관련된 권한이며, 이를 생성할 IAM 계정에게 부여하면 될 것이다.
+
+![](https://i.imgur.com/N6OB7pq.png)
+
+하지만 AWS에서 기본적으로 제공하는 권한정책 중에서는 위에서 찾아본 권한만 알맞게 포함하고 있는 정책이 없기 때문에, 직접 정책을 생성해야 한다.
+
+![](https://i.imgur.com/JRwd9QE.png)
+
+`amazon-ecr-login` 공식문서에서 예시로 든 정책의 포맷이 `JSON` 형식이었기 때문에, 여기서도 편집기 타입을 `JSON`에 맞춰주자.
+
+거의 그대로 복사해 붙여넣되, `Resource` 필드에는 내가 생성했던 ECR 리포지토리의 정보에 맞게 수정해주면 된다.
+
+![](https://i.imgur.com/1mm2HJ9.png)
+
+이후 정책 이름을 입력하고, 정책을 생성하면 된다. 나는 `AWSServiceRoleForAmazonECRPrivate`라는 이름으로 생성하였다.
+
+![](https://i.imgur.com/qQITBZp.png)
+
+생성한 정책을 IAM 계정에 연결하면 최종적으로 IAM 계정이 생성된다. 이제, `액세스 키 만들기` 버튼을 클릭하여 `configure-aws-credentials`에 필요한 `aws-access-key-id`, `aws-secret-access-key`를 생성하면 된다.
+
+![](https://i.imgur.com/NfM6nWX.png)
+
+`AWS 외부에서 실행되는 애플리케이션` 항목을 체크하고 다음으로 넘어가자.
+
+![](https://i.imgur.com/7DryUx3.png)
+
+설명 태그를 작성하고 `액세스 키 만들기` 버튼을 누르면 생성된다. 나의 경우, IAM 계정 사용자 이름과 동일하게 `greenhead-blog`를 설명 태그로 입력하였다.
+
+![](https://i.imgur.com/d49RYO0.png)
+
+그려면 <u>1️⃣액세스 키<sup>`aws-access-key-id`</sup></u>와 <u>2️⃣비밀 액세스 키<sup>`aws-secret-access-key`</sup></u>가 생성된 것을 확인할 수 있다.
+
+<Callout variant="warning">
+  ⚠️ 해당 페이지를 벗어나면 더 이상 비밀 액세스 키를 확인할 수 없으니, 복사해서 어딘가 안전한 곳에 저장해 두도록 하자.
+</Callout>
+
+---
+### 3. AWS IAM 계정 액세스 키 -> Github Secrets 저장
+이제 Github Actions 스크립트를 작성하...기 전에, `aws-access-key-id`, `aws-secret-access-key`를 Github에 환경변수로 저장해둘 필요가 있다.
+
+이 레포지토리는 프라이빗이 아닌 퍼블릭이고, 사실 굳이 퍼블릭이 아니어도 이러한 민감한 정보를 직접 코드에 작성하는 것은 대단히 좋지 못하다.
+
+Github는 이러한 민감한 정보를 Actions에서 안전하게 사용할 수 있도록 [Secrets](https://docs.github.com/ko/actions/security-guides/using-secrets-in-github-actions)라는 기능을 제공한다. 이를 사용하여 환경변수를 저장하고, 이를 Github Actions 스크립트에서 사용할 수 있다.
+
+![](https://i.imgur.com/0QZq9zu.png)
+
+레포지토리에서 `Settings` > `Security` > `Secrets and Variables` > `Actions` 항목으로 들어간 후, `New repository secret` 버튼을 클릭한다.
+
+<Callout variant="info">
+  <b>📝 Repository Secrets와 Environment Secrets의 차이점</b><br />
+  <br />
 
 
+  <b>Repository Secrets</b>는 <u>특정 리포지토리에 한해서 사용할 수 있는 환경변수를 정의</u>할 때 사용하며, 이번 포스트에서도 이를 사용할 것이다.
+  <br />
+
+  <b>Environment Secrets</b>는 <u>환경 별로(ex: `develop`, `staging`, `production`) 서로 다른 비밀정보를 정의</u>할 때 사용한다. 이를 통해 동일한 리포지토리 내에서도 환경별로 다른 비밀 정보를 사용할 수 있게 되므로 Repository Secrets보다 더 유연하게 사용할 수 있다.
+</Callout>
+
+![](https://i.imgur.com/dSu7AX8.png)
+
+이전에 생생한 액세스 키, 시크릿 키를 가져와서 각각 다음의 이름으로 Secret을 생성한다.
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+
+
+![](https://i.imgur.com/sMIf4EU.png)
+
+작성 후 위 사진과 같이 2개의 Secret가 생성된 것을 확인하였다면, 이제 정말로 Github Actions 스크립트를 작성할 차례이다.
+
+---
+### 4. Github Actions 워크플로우 작성
+
+![](https://i.imgur.com/4eaXbCE.png)
+
+사진과 같이 블로그 프로젝트 루트 경로로부터 `.github/workflows/main.yaml` 파일을 생성한다.
+
+이 파일은 Github Actions 워크플로우를 정의하는 파일로, 이 파일 내부에 작성한 코드가 Github Actions를 통해 실행될 것이다.
+
+![](https://i.imgur.com/Gmo6jqS.png)
+
+전체적인 스크립트는 Github에서 기본 제공하는 workflow 템플릿 중에서 `Deploy to Amazon ECS`를 참고하여 작성하였다.
+
+우선, <b>전체 코드</b>를 먼저 보자.
+
+```yaml
+name: Build image and push to Amazon ECR
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: greenhead-blog
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+```
+
+전역 필드는 3가지 필드로 구성되어 있다.
+
+- <b>`name`</b> : <u>워크플로우의 <b>이름</b></u>. 기능에 부합하는 적절한 이름을 사용한다.
+- <b>`on`</b> : <u>워크플로우가 실행될 <b>조건</b></u>.
+  - 나의 경우 `(git) push` 이벤트가 발생하고, 브랜치가 `master`일 때 실행되도록 하였다.
+- <b>`jobs`</b> : <u>워크플로우가 수행할 <b>`job`</b></u>.
+  - 나의 경우 `build-and-push`라는 이름의 `job`을 정의하였다.
+
+
+<br />
+<br />
+
+`build-and-push`는 다시 `runs-on`, `steps` 2개의 필드로 구성되어 있다.
+
+- <b>`runs-on`</b> : `job`을 실행시킬 때 OS 환경을 정의한다.
+  - 나의 경우 `ubuntu-latest`를 사용하였는데, 이는 Github Actions가 제공하는 `ubuntu` 환경 중 <b>가장 최신 버전</b>을 사용하겠다는 의미이다.
+- <b>`steps`</b> : 해당 `job`이 수행할 <b>단계</b>를 정의한다.
+
+<br />
+
+`steps` 필드에 작성된 단계가 가장 중요한데, 이 단계들이 <u>순차적으로 실행</u>되면서 워크플로우가 수행된다.
+
+하나씩 알아보도록 하자.
+
+---
+### 1️⃣ step - `Checkout`
+
+```yaml
+- name: Checkout
+  uses: actions/checkout@v3
+```
+
+2줄의 코드로 이루어져 있지만 매우 중요한 단계이다. 이 단계는 <u>Github Actions가 실행되는 환경에 현재 레포지토리의 코드를 가져오는 역할</u>을 한다.
+
+만약 이 단계가 없다면, Github Actions가 실행되는 환경에는 아무런 코드도 없기 때문에, 이후의 단계들은 모두 실패하게 된다.
+
+코드가 없다면 아무것도 못하므로 이 단계는 필수적으로 정의되어야 하며, 또한 <u>`steps` 필드 내에서 <b>가장 먼저</b> 정의</u>되어야 한다.
+
+---
+### 2️⃣ step - `Configure AWS Credentials`
+
+```yaml
+- name: Configure AWS Credentials
+  uses: aws-actions/configure-aws-credentials@v1
+  with:
+    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    aws-region: ap-northeast-2
+```
+
+AWS Actions인 `configure-aws-credentials`를 사용하여, Github Actions가 AWS 리소스에 접근할 수 있도록 한다.
+
+`with` 문에서는 3개의 필드가 정의되어 있는데, 각각의 역할은 다음과 같다.
+- <b>`aws-access-key-id`</b> : AWS IAM 계정의 <b>액세스 키</b>
+- <b>`aws-secret-access-key`</b>: AWS IAM 계정의 <b>비밀 액세스 키</b>
+- <b>`aws-region`</b> : 사용할 AWS 리소스가 위치한 <b>리전</b>을 정의한다.
+
+<br />
+
+Github Secrets에 저장한 환경변수를 워크플로우에서 사용하기 위해서는 `${{ secrets.변수명 }}` 형식으로 사용하면 된다.
+
+
+---
+### 3️⃣ step - `Login to Amazon ECR`
+
+```yaml
+- name: Login to Amazon ECR
+  id: login-ecr
+  uses: aws-actions/amazon-ecr-login@v2
+```
+
+`amazon-ecr-login`을 사용하여, Github Actions가 ECR에 이미지를 업로드할 수 있도록 로그인한다.
+
+`id` 필드는 해당 단계를 참조할 때 사용할 수 있는 식별자로, 이후의 단계에서 이 단계의 출력값을 사용할 때 사용된다.
+
+---
+### 4️⃣ step - `Build, tag, and push image to Amazon ECR`
+
+```yaml
+- name: Build, tag, and push image to Amazon ECR
+  env:
+    REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    REPOSITORY: greenhead-blog
+    IMAGE_TAG: ${{ github.sha }}
+  run: |
+    docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+    docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+```
+
+마지막 단계는 실제로 도커 이미지를 빌드하고 ECR에 업로드하는 단계이다.
+
+`env` 필드에는 환경변수를 정의하는데, 이 환경변수는 `run` 필드에서 사용된다.
+
+- <b>`REGISTRY`</b> : ECR 리포지토리의 주소.
+  - `login-ecr` 단계의 반환값`outputs` 중 `registry` 필드를 사용한다.
+- <b>`REPOSITORY`</b> : ECR 리포지토리의 이름.
+- <b>`IMAGE_TAG`</b> : 이미지 태그.
+  - Github Actions가 실행되는 환경에는 `github.sha`라는 환경변수가 존재하는데, 이는 Actions를 트리거한 커밋의 SHA 해시값이다.
+  - 이를 사용하여 유니크한 이미지 태그를 정의하였다.
+
+`run` 필드에는 실제로 실행할 명령어를 작성하는데, 여기서는 다음 2가지 명령어를 실행한다.
+- `docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .` : 도커 이미지를 빌드한다.
+- `docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG` : 빌드한 도커 이미지를 ECR에 업로드한다.
+
+
+---
+### ✅ AWS ECR 업로드!
+
+작성한 워크플로우가 정상적으로 동작하는지 확인하기 위해 `master` 브랜치에 코드를 푸시해보자.
+
+![](https://i.imgur.com/uzyv0Ld.png)
+
+✅ 아이콘이 표시되었음은 워크플로우가 성공적으로 실행되었음을 의미한다.
+
+![](https://i.imgur.com/YlLMRkK.png)
+
+AWS ECR `greenhead-blog` 레포지토리에 실제로 이미지가 업로드 된 것을 확인할 수 있다!
+
+---
+## 🤔 다음으로 할 것은?
+
+지금까지 도커 이미지를 빌드하고, 이를 AWS ECR에 업로드하는 과정을 정리해보았는데, 사실 이는 다음에 다룰 쿠버네티스에 비하면 정말 간단한 내용들이다..
+
+다음에는 이렇게 업로드한 이미지를 쿠버네티스 클러스터에 가져와 사용할 수 있도록 하는 과정을 자세히! 정리해 보겠다. 🥹

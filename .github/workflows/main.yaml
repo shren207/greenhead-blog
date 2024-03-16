@@ -2,7 +2,7 @@ name: Build image and push to Amazon ECR
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "DO_NOT_TRIGGER" ]
 
 jobs:
   build-and-push:

@@ -4,6 +4,7 @@ import { graphql, Link, useStaticQuery } from 'gatsby';
 import { Bio } from '../components/bio';
 import * as Elements from '../components/elements';
 import { Head } from '../components/head';
+import { Callout } from '../components/mdx/callout';
 import { PostDate } from '../components/post-date';
 import { PostNavigator } from '../components/post-navigator';
 import { PostTitle } from '../components/post-title';
@@ -13,7 +14,7 @@ import * as ScrollManager from '../utils/scroll';
 import '../styles/code.scss';
 import 'katex/dist/katex.min.css';
 
-const shortcodes = { Link };
+const shortcodes = { Link, Callout };
 
 export default function PageTemplate({ pageContext, location, children }) {
   const queryForSiteMetaData = useStaticQuery(graphql`

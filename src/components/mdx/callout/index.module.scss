@@ -1,0 +1,60 @@
+.container {
+  margin: 1.5rem auto;
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  border-left-width: 0.5rem;
+  border-left-style: solid;
+  transition: all 0.3s;
+
+  > p {
+    margin: 0;
+  }
+
+  // 1️⃣ note 타입
+  &.note {
+    border-left-color: #D4D5D8;
+    background-color: #F9F9FA;
+    color: #474748;
+  }
+  :global(body.dark) &.note {
+    border-left-color: #D4D5D8;
+    background-color: #474748;
+    color: #FDFDFE;
+  }
+
+  // 2️⃣ tip 타입
+  &.tip {
+    border-left-color: #009400;
+    background-color: #E6F5E6;
+    color: #013100;
+  }
+  :global(body.dark) &.tip {
+    border-left-color: #009400;
+    background-color: #013100;
+    color: #E6F5E6;
+  }
+
+  // 3️⃣ info 타입
+  &.info {
+    border-left-color: #4BB3D3;
+    background-color: #EEF9FC;
+    color: #193C47;
+  }
+  :global(body.dark) &.info {
+    border-left-color: #4BB3D3;
+    background-color: #193C47;
+    color: #EEF9FC;
+  }
+
+  // 4️⃣ warning 타입
+  &.warning {
+    border-left-color: #E6A700;
+    background-color: #FFF8E6;
+    color: #4D3800;
+  }
+  :global(body.dark) &.warning {
+    border-left-color: #E6A700;
+    background-color: #4D3800;
+    color: #FFF8E6;
+  }
+}

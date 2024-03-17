@@ -16,7 +16,7 @@ module.exports = {
   keywords: [`blog`],
   comment: {
     disqusShortName: ``, // Your disqus-short-name. check disqus.com.
-    utterances: 'shren207/my-greenhead-blog', // Your repository for archive comment
+    utterances: 'shren207/greenhead-blog', // Your repository for archive comment
   },
   configs: {
     countOfInitialPost: 10, // Config your initial count of post
@@ -29,4 +29,4 @@ module.exports = {
   },
   ga: '0', // Add your google analytics tranking ID
   ad: '', // Add your google adsense publisherId `ca-pub-xxxxxxxxxx`
-}
+};

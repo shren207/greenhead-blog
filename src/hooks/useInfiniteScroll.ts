@@ -26,7 +26,7 @@ export function useInfiniteScroll(
     window.addEventListener(`scroll`, onScroll, { passive: false });
 
     return () => {
-      window.removeEventListener(`scroll`, onScroll);
+      window.removeEventListener(`scroll`, onScroll, { passive: false });
     };
-  }, []);
+  }, [onScroll]);
 }

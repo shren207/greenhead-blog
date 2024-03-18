@@ -3,10 +3,17 @@ import { Footer } from '../components/footer';
 import { Header } from '../components/header';
 import { ThemeSwitch } from '../components/theme-switch';
 import { Top } from '../components/top';
+import type { ReactNode, FC } from 'react';
 
 import './index.scss';
 
-export const Layout = ({ location, title, children }) => {
+interface LayoutProps {
+  location: Location;
+  title: string;
+  children: ReactNode;
+}
+
+export const Layout: FC<LayoutProps> = ({ location, title, children }) => {
   const rootPath = `${__PATH_PREFIX__}/`;
 
   return (

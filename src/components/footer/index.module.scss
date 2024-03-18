@@ -1,11 +1,9 @@
 @import '../../styles/variables.scss';
 
-.footer {
-  //padding-top: 52px;
+.container {
   @include scale(padding-top, 52px);
-  text-align: center;
-  //font-size: 12px;
   @include scale(font-size, 12px);
+  text-align: center;
 
   a {
     text-decoration: none !important;

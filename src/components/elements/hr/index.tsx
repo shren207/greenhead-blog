@@ -1,3 +1,6 @@
-import './index.scss';
+import classNames from 'classnames/bind';
+import styles from './index.module.scss';
 
-export const Hr = () => <hr className="custom-hr" />;
+const cx = classNames.bind(styles);
+
+export const Hr = () => <hr className={cx('container')} />;

@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-
 import { CATEGORY_TYPE } from '../../constants';
 import { ThumbnailContainer } from '../thumbnail-container';
 import { ThumbnailItem } from '../thumbnail-item';

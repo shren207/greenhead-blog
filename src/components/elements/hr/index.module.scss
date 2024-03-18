@@ -1,10 +1,8 @@
 @import '../../../styles/variables.scss';
 
-.custom-hr {
-  //margin: 64px;
+.container {
   @include scale(margin, 64px);
+  @include scale(height, 2px);
   background: $theme-gradient;
   border: none;
-  //height: 2px;
-  @include scale(height, 2px);
 }

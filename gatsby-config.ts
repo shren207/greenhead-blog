@@ -170,6 +170,7 @@ module.exports = {
     {
       resolve: `gatsby-plugin-sass`,
       options: {
+        additionalData: `@import "${__dirname}/src/styles/mixin.scss";`,
         cssLoaderOptions: {
           esModule: true,
           modules: {

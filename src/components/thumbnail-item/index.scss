@@ -1,11 +1,11 @@
 @import '../../styles/variables.scss';
 
 .thumbnail {
+  @include scale(margin-top, 10px);
+  @include scale(margin-bottom, 12px);
+  @include scale(padding, 4px);
+  @include scale(padding-bottom, 12px);
   display: block;
-  margin-top: 10px;
-  margin-bottom: 12px;
-  padding: 4px;
-  padding-bottom: 12px;
   box-shadow: none;
   transition: text-shadow 0.3s, opacity 0.4s;
   opacity: 0;
@@ -15,37 +15,79 @@
     justify-content: space-between;
   }
 
+  .metadatas {
+    display: flex;
+    align-items: center;
+    @include scale(column-gap, 10px);
+
+    @include on-mobile {
+      @include scale(column-gap, 5px);
+    }
+  }
+
   .tag {
-    margin-right: 10px;
-    font-size: 11px;
+    @include scale(font-size, 11px);
+    @include scale(padding, 1px 7px);
+    @include scale(border-radius, 8px);
     background: yellowgreen;
-    padding: 1px 7px;
     font-weight: 700;
-    border-radius: 8px;
     text-transform: uppercase;
     color: black;
+
+    @include on-mobile {
+      @include scale(font-size, 8px);
+    }
   }
   .date {
-    font-size: 13px;
+    @include scale(font-size, 13px);
     opacity: 0.9;
+
+    @include on-mobile {
+      @include scale(font-size, 11px);
+    }
   }
   h3 {
-    margin-top: 6px;
-    font-size: 25px;
+    @include scale(margin-top, 6px);
+    @include scale(font-size, 25px);
+
+    @include on-mobile {
+      max-width: 90%;
+      @include scale(font-size, 17px);
+    }
   }
 
   p {
     line-height: 1.4;
+
+    @include on-mobile {
+      @include scale(font-size, 12px);
+    }
+  }
+
+  .imageWrapper{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: min-content;
+  }
+
+  .gatsby-image-wrapper {
+    height: 100%;
   }
 
   .gatsby-image {
-    width: 90px; // 80 -> 90
-    height: 90px; // 80 -> 90
-    min-width: 90px;
-    border-radius: 7px;
-    margin-left: 15px;
-    margin-top: 30px; // 큐트리 님의 경우는 30px로 설정하셨음! (이미지 위아래 크기)
+    @include scale(width, 90px);
+    @include scale(height, 90px);
+    @include scale(min-width, 90px);
+    @include scale(border-radius, 7px);
     transition: all 0.3s;
+    object-fit: contain;
+
+    @include on-mobile {
+      @include scale(width, 70px);
+      @include scale(height, 70px);
+      @include scale(min-width, 70px);
+    }
   }
 }
 .thumbnail:hover .gatsby-image {

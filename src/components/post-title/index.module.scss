@@ -1,0 +1,7 @@
+.container {
+  @include scale(margin-top, 39px);
+
+  @include on-mobile {
+    @include scale(font-size, 24px);
+  }
+}

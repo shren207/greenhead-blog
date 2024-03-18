@@ -1,47 +1,82 @@
 @import '../../styles/variables.scss';
 
 .bio {
-  margin-bottom: 24px;
+  @include scale(margin-bottom, 24px);
 
   .author-description {
+    @include scale(column-gap, 12px);
     display: flex;
+    align-items: center;
   }
 
   .author-image {
-    margin-top: 12px;
-    margin-right: 12px;
+    border-radius: 100%;
     margin-bottom: 0;
-    min-width: 72px;
+
+    @include on-mobile {
+      @include scale(width, 70px);
+      @include scale(height, 70px);
+      @include scale(min-width, 70px);
+    }
+  }
+
+  .author-name {
+    display: flex;
+    flex-direction: column;
+    @include scale(row-gap, 4px);
+
+    @include on-mobile {
+        @include scale(row-gap, 2px);
+    }
+  }
+
+  .metadatas {
+    display: flex;
+    align-items: center;
+    @include scale(column-gap, 4px);
   }
 
   .author-name-prefix {
     font-size: 90%;
-    margin-right: 4px;
+
+    @include on-mobile {
+      @include scale(font-size, 12px);
+    }
   }
 
   .author-name-content {
+    @include scale(padding, 2px 6px);
+    @include scale(border-radius, 8px);
     display: inline-block;
     font-size: 95%;
-    padding: 2px 6px;
     font-weight: bolder;
-    border-radius: 8px;
     transform-origin: center;
     animation: flutter 2s infinite linear;
+
+    @include on-mobile {
+      @include scale(font-size, 14px);
+    }
   }
 
   .author-introduction {
-    margin-top: 4px;
+    @include scale(line-height, 1.4);
     font-size: 90%;
-    line-height: 1.4;
+
+    @include on-mobile {
+      @include scale(font-size, 12px);
+    }
   }
 
   .author-socials {
-    margin-top: 4px;
   }
 
   a {
-    margin-right: 8px;
     font-size: 80%;
+    @include scale(margin-top, 8px);
+
+    @include on-mobile {
+      @include scale(font-size, 10px);
+    }
 
     &.visited {
       text-decoration: none;

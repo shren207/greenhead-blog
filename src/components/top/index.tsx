@@ -1,8 +1,10 @@
+import classNames from 'classnames/bind';
 import { Link } from 'gatsby';
+import styles from './index.module.scss';
 import { GitHubIcon } from '../social-share/github-icon';
 import type { FC } from 'react';
 
-import './index.scss';
+const cx = classNames.bind(styles);
 
 interface TopProps {
   title: string;
@@ -14,9 +16,9 @@ export const Top: FC<TopProps> = ({ title, location, rootPath }) => {
   const isRoot = location.pathname === rootPath;
 
   return (
-    <div className="top">
+    <div className={cx('container', { isRoot })}>
       {!isRoot && (
-        <Link to="/" className="link">
+        <Link to="/" className={cx('link')}>
           {title}
         </Link>
       )}

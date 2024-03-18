@@ -47,6 +47,10 @@ pre[class*='language-'] {
 
   -ms-overflow-style: none; // IE 10+
   overflow: -moz-scrollbars-none; // Firefox
+
+  @include on-mobile {
+    @include scale(font-size, 10.5px);
+  }
 }
 
 pre[class*='language-']::-webkit-scrollbar {
@@ -68,11 +72,15 @@ pre[class*='language-'] {
 
 /* Inline code */
 :not(pre) > code[class*='language-'] {
-  padding: 0.1em 0.6em;
-  border-radius: 0.2em;
+  @include scale(padding, 1px 6px);
+  @include scale(border-radius, 2px);
   white-space: normal;
   background: $inline-dimmed-color;
   color: $inline-text-color;
+
+  @include on-mobile {
+    @include scale(padding, 0.5px 3px);
+  }
 }
 
 .token.comment,

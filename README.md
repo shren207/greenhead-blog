@@ -7,7 +7,7 @@
 - [ ] Module CSS 전환 (최종적으로는 [classnames](https://github.com/JedWatson/classnames) 사용)
   - [x] 설치 및 적용
   - [ ] 기존 SCSS -> `classnames` 사용한 Module SCSS로 전환
-- [ ] JS -> TS 전환하기 (55.5%)
+- [ ] JS -> TS 전환하기 (61.5%)
 - [ ] [반응형 SASS](https://tech.devsisters.com/posts/shrinking-webpage/) 적용하기
 - [ ] 포스트, 태그 개수 보여주는 사이드바 만들기
 

@@ -11,12 +11,23 @@ import { PostTitle } from '../components/post-title';
 import { Utterances } from '../components/utterances';
 import { Layout } from '../layout';
 import * as ScrollManager from '../utils/scroll';
+import type { ReactNode } from 'react';
 import '../styles/code.scss';
 import 'katex/dist/katex.min.css';
 
 const shortcodes = { Link, Callout };
 
-export default function PageTemplate({ pageContext, location, children }) {
+interface PageTemplateProps {
+  pageContext: any;
+  location: Location;
+  children: ReactNode;
+}
+
+export default function PageTemplate({
+  pageContext,
+  location,
+  children,
+}: PageTemplateProps) {
   const queryForSiteMetaData = useStaticQuery(graphql`
     query {
       site {
@@ -40,7 +51,9 @@ export default function PageTemplate({ pageContext, location, children }) {
 
   useEffect(() => {
     ScrollManager.init();
-    return () => ScrollManager.destroy();
+    return () => {
+      ScrollManager.destroy();
+    };
   }, []);
 
   return (

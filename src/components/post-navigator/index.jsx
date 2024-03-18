@@ -1,12 +1,14 @@
+import classNames from 'classnames/bind';
 import { Link } from 'gatsby';
+import styles from './index.module.scss';
 
-import './index.scss';
+const cx = classNames.bind(styles);
 
 export const PostNavigator = ({ pageContext }) => {
   const { previous, next } = pageContext;
 
   return (
-    <ul className="navigator">
+    <ul className={cx('container')}>
       <li>
         {previous && (
           <Link to={previous.fields.slug} rel="prev">

@@ -3,24 +3,23 @@ import { Footer } from '../components/footer';
 import { Header } from '../components/header';
 import { ThemeSwitch } from '../components/theme-switch';
 import { Top } from '../components/top';
-import { rhythm } from '../utils/typography';
+import type { ReactNode, FC } from 'react';
 
 import './index.scss';
 
-export const Layout = ({ location, title, children }) => {
+interface LayoutProps {
+  location: Location;
+  title: string;
+  children: ReactNode;
+}
+
+export const Layout: FC<LayoutProps> = ({ location, title, children }) => {
   const rootPath = `${__PATH_PREFIX__}/`;
 
   return (
     <Fragment>
       <Top title={title} location={location} rootPath={rootPath} />
-      <div
-        style={{
-          marginLeft: `auto`,
-          marginRight: `auto`,
-          maxWidth: rhythm(27), // 기본값은 24, Gparkkii.io의 포스트 폭은 29
-          padding: `${rhythm(1.5)} ${rhythm(3 / 4)}`,
-        }}
-      >
+      <div className="layout-container">
         <ThemeSwitch />
         <Header title={title} location={location} rootPath={rootPath} />
         {children}

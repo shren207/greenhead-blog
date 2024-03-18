@@ -1,0 +1,17 @@
+.container {
+  @include scale(font-size, 48px);
+  @include scale(letter-spacing, -2px);
+  margin-top: 0;
+  border-bottom: none;
+  font-weight: 900;
+
+  @include on-mobile {
+    @include scale(font-size, 32px);
+  }
+}
+
+.link {
+  box-shadow: none;
+  text-decoration: none;
+  color: inherit;
+}

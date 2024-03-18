@@ -1,0 +1,30 @@
+@import '../../styles/variables.scss';
+
+.container {
+  @include scale(height, 60px);
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: $theme-gradient;
+
+  &.isRoot {
+    justify-content: flex-end;
+  }
+
+  .link {
+    @include scale(font-size, 28px);
+    @include scale(margin-left, 20px);
+    display: inline-block;
+    font-family: 'Catamaran';
+    font-weight: 800;
+    color: $top-header-text-color;
+    opacity: 0.7;
+
+    @include on-mobile {
+      @include scale(font-size, 20px);
+      @include scale(margin-left, 14px);
+    }
+  }
+}

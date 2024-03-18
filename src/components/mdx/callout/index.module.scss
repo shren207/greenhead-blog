@@ -1,13 +1,17 @@
 .container {
-  margin: 1.5rem auto;
-  padding: 1rem 2rem;
-  border-radius: 0.5rem;
-  border-left-width: 0.5rem;
+  @include scale(margin, 15px auto);
+  @include scale(padding, 10px 20px);
+  @include scale(border-radius, 5px);
+  @include scale(border-left-width, 5px);
   border-left-style: solid;
   transition: all 0.3s;
 
   > p {
     margin: 0;
+  }
+
+  b {
+    @include scale(font-size, 12px);
   }
 
   // 1️⃣ note 타입

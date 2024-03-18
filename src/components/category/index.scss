@@ -1,8 +1,11 @@
 @import '../../styles/variables.scss';
 
 .category-container {
+  @include scale(column-gap, 6px);
+  @include scale(padding, 6px 20px);
   position: sticky;
   position: -webkit-sticky;
+  display: flex;
   top: 0;
   line-height: 0;
   white-space: nowrap;
@@ -10,21 +13,29 @@
   -ms-overflow-style: none; // IE 10+
   overflow: -moz-scrollbars-none; // Firefox
   z-index: 1;
-  padding: 6px 20px;
+
+  @include on-mobile {
+    @include scale(padding, 5px 10px);
+    @include scale(column-gap, 5px);
+  }
 
   .item {
+    @include scale(border-radius, 15px);
     display: inline-block;
-    margin: 0.25rem 6px 0.25rem 0;
-    border-radius: 15px;
     white-space: normal;
     box-sizing: border-box;
     cursor: pointer;
 
     div {
+      @include scale(padding, 15px);
+      @include scale(font-size, 13px);
       display: block;
-      padding: 14px 16px 16px 16px;
-      font-size: 13px;
       box-sizing: border-box;
+
+      @include on-mobile {
+        @include scale(padding, 12px);
+        @include scale(font-size, 11px);
+      }
     }
   }
 

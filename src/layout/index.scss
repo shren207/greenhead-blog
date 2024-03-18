@@ -9,3 +9,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.3s, color 0.3s;
 }
+
+.layout-container {
+  @include scale(max-width, 702px);
+  @include scale(padding, 39px 19.5px);
+  margin-left: auto;
+  margin-right: auto;
+}
+

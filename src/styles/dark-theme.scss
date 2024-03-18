@@ -21,13 +21,17 @@ body.dark {
   }
 
   .category-container {
-    border-top: 1px solid $dark-category-border-color;
-    border-bottom: 1px solid $dark-category-border-color;
-    border-right: 6px solid $dark-category-border-color;
-    border-left: 6px solid $dark-category-border-color;
+    @include scale(border-top-width, 1px);
+    @include scale(border-bottom-width, 1px);
+    @include scale(border-right-width, 6px);
+    @include scale(border-left-width, 6px);
+    border-style: solid;
+    border-color: $dark-category-border-color;
     background-color: $dark-category-background-color;
     .item {
-      border: 1px solid $dark-category-border-color;
+      @include scale(border-width, 1px);
+      border-style: solid;
+      border-color: $dark-category-border-color;
       background-color: $dark-category-item-color;
       -webkit-box-shadow: 0px 1px 1px rgba(255, 255, 255, 0.1);
       box-shadow: 0px 1px 1px rgba(255, 255, 255, 0.1);
@@ -35,7 +39,9 @@ body.dark {
         color: $dark-category-text-color;
       }
       &[aria-selected='true'] {
-        border: 2px solid $dark-category-highlight-border-color;
+        @include scale(border-width, 2px);
+        border-style: solid;
+        border-color: $dark-category-highlight-border-color;
         font-weight: bolder;
       }
       &[aria-selected='true'] a {
@@ -70,7 +76,9 @@ body.dark {
 
   // post
   blockquote {
-    border-left: 4px solid rgba(255, 255, 255, 0.822);
+    @include scale(border-left-width, 4px);
+    border-left-style: solid;
+    border-left-color: rgba(255, 255, 255, 0.3);
   }
 
   h1,
@@ -85,6 +93,8 @@ body.dark {
     }
   }
   td {
-    border-bottom: 1px solid #eee;
+    @include scale(border-bottom-width, 1px);
+    border-bottom-style: solid;
+    border-bottom-color: #eee;
   }
 }

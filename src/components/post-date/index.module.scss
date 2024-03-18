@@ -1,5 +1,5 @@
 .container {
+  @include scale(font-size, 12px);
   text-align: right;
-  font-size: 12px;
   font-style: italic;
 }

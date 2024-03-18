@@ -1,12 +1,14 @@
 import { memo } from 'react';
+import classNames from 'classnames/bind';
+import styles from './index.module.scss';
 import type { ReactNode, FC } from 'react';
 
-import './index.scss';
+const cx = classNames.bind(styles);
 
 interface ThumbnailContainerProps {
   children: ReactNode;
 }
 
 export const ThumbnailContainer: FC<ThumbnailContainerProps> = memo(
-  ({ children }) => <div className="thumbnail-container">{children}</div>
+  ({ children }) => <div className={cx('container')}>{children}</div>
 );

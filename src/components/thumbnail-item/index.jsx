@@ -5,7 +5,7 @@ import { TARGET_CLASS } from '../../utils/visible';
 import './index.scss';
 
 // img 파일의 크기는 150px * 150px
-export const ThumbnailItem = ({ node, data }) => {
+export const ThumbnailItem = ({ node }) => {
   const result = useStaticQuery(graphql`
     query {
       allFile(
@@ -37,8 +37,10 @@ export const ThumbnailItem = ({ node, data }) => {
     <Link className={`thumbnail ${TARGET_CLASS}`} to={node.fields.slug}>
       <div className="container" key={node.fields.slug}>
         <div>
-          <span className="tag">{node.frontmatter.category}</span>
-          <span className="date">{node.frontmatter.date}</span>
+          <div className="metadatas">
+            <span className="tag">{node.frontmatter.category}</span>
+            <span className="date">{node.frontmatter.date}</span>
+          </div>
           <h3>{node.frontmatter.title || node.fields.slug}</h3>
           <p
             dangerouslySetInnerHTML={{
@@ -47,11 +49,14 @@ export const ThumbnailItem = ({ node, data }) => {
           />
         </div>
         {node.frontmatter.thumbnail ? (
-          <GatsbyImage
-            className="gatsby-image"
-            image={imageData}
-            alt="thumbnail"
-          />
+          <div className="imageWrapper">
+            <GatsbyImage
+              className="gatsby-image"
+              image={imageData}
+              objectFit="contain"
+              alt="thumbnail"
+            />
+          </div>
         ) : null}
       </div>
     </Link>

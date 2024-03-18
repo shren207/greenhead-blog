@@ -2,9 +2,9 @@
   text-align: right;
 
   .icon {
+    @include scale(font-size, 14px);
+    font-weight: 900;
     text-align: center;
     color: #222;
-    font-size: 14px;
-    font-weight: 900;
   }
 }

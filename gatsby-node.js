@@ -3,55 +3,52 @@ const { createFilePath } = require(`gatsby-source-filesystem`);
 
 exports.createPages = async ({ graphql, actions }) => {
   const { createPage } = actions;
+  // const postTemplate = path.resolve(`./src/templates/blog-post.jsx`);
 
-  const postTemplate = path.resolve(`./src/templates/blog-post.jsx`);
-
-  return await graphql(
-    `
-      {
-        allMdx(
-          filter: {
-            frontmatter: { category: { ne: null }, draft: { eq: false } }
+  return await graphql(`
+    {
+      allMdx(
+        filter: {
+          frontmatter: { category: { ne: null }, draft: { eq: false } }
+        }
+        sort: { frontmatter: { date: DESC } }
+        limit: 1000
+      ) {
+        edges {
+          node {
+            id
+            fields {
+              slug
+            }
+            frontmatter {
+              title
+              category
+              date(formatString: "MMMM DD, YYYY")
+            }
+            internal {
+              contentFilePath
+            }
           }
-          sort: { frontmatter: { date: DESC } }
-          limit: 1000
-        ) {
-          edges {
-            node {
-              id
-              fields {
-                slug
-              }
-              frontmatter {
-                title
-                category
-                date(formatString: "MMMM DD, YYYY")
-              }
-              internal {
-                contentFilePath
-              }
+          previous {
+            fields {
+              slug
             }
-            previous {
-              fields {
-                slug
-              }
-              frontmatter {
-                title
-              }
+            frontmatter {
+              title
             }
-            next {
-              fields {
-                slug
-              }
-              frontmatter {
-                title
-              }
+          }
+          next {
+            fields {
+              slug
+            }
+            frontmatter {
+              title
             }
           }
         }
       }
-    `
-  ).then((result) => {
+    }
+  `).then((result) => {
     if (result.errors) {
       throw result.errors;
     }
@@ -61,7 +58,6 @@ exports.createPages = async ({ graphql, actions }) => {
       createPage({
         path: post.node.fields.slug,
         component: post.node.internal.contentFilePath,
-        // component: `${postTemplate}?__contentFilePath=${post.node.internal.contentFilePath}`,
         context: {
           mdx: post.node,
           slug: post.node.fields.slug,

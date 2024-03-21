@@ -1,0 +1,78 @@
+---
+title: "[HTML] input 태그 커스텀하기"
+date: 2024-03-21 23:03:68
+category: til
+thumbnail: html
+draft: false
+---
+
+import Layout from '/src/templates/blog-post';
+export default Layout;
+
+
+## 1️⃣ type = number
+<img src="https://i.imgur.com/BKtsf97.png" />
+
+`<input type="number" />`과 같이 `type` 어트리뷰트가 number인 `input` 태그는 우측에 `chevron`이 기본적으로 존재한다.
+
+보통은 위 사진에서처럼 기본적으로 제공하는 `chevron` 아이콘을 제거하고, 직접 커스텀 `chevron` 아이콘 혹은 다른 UI를 변경하는 경우가 많다.
+
+기본 `chevron` 아이콘을 제거하기 위해서는 아래와 같이 한다.
+
+```css
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+```
+
+위 방식을 사용해서 기본 `chevron` 아이콘을 제거한다면, 이후 커스텀 `Dropdown` 컴포넌트 만드는 것이 상당히 편할 것이다.
+
+
+
+## 2️⃣ type = file
+<img src="https://i.imgur.com/vVz4avS.png" />
+
+`type=number` 일때 우측 `chevron` 아이콘과 마찬가지로, `type=file`일때의 `input` 태그의 기본 UI 또한 상당히 못생겼다.
+
+<img src="https://i.imgur.com/cduWjYC.png" />
+
+`type=file`인 `input` 태그를 커스터마이징할 때는, 보통 다음과 같은 방식을 즐겨 사용한다.
+
+- `input` 태그에 `display: none;` 속성을 주어 DOM에서 제거한다.
+- `input` 태그의 역할을 대신할 `div` 태그를 예쁘게 커스텀한다.
+- 해당 태그를 클릭하는 경우, 가려진 `input` 태그를 클릭하는 이벤트를 추가한다.
+
+
+### 📝 예시
+<img src="https://i.imgur.com/0i9JzJF.png" />
+썸네일 이미지를 업로드하는 `<ThumbnailInput>` 컴포넌트를 만들어보자.
+
++ `<div>` : 업로드한 이미지가 렌더링될 영역
+
++ `<label>` : 클릭 시 input 태그가 클릭되도록 기능할 커스텀 버튼
+
++ `<input>` : 가려질 input 태그
+
++ `.container` 클래스에 적용될 CSS 셀렉터를 보면 아래와 같이 `display: none;` 속성이 적용되어 있다.
+
+```scss
+.container {
+  position: relative;
+  width: 16rem;
+  height: 16rem;
+  border: 0.1rem solid gray;
+  background-color: gray;
+
+  input[file="file"] {
+    display: none;
+  }
+}
+```
+
+
+최종적으로, 아래 사진과 비슷하게 input 태그를 커스텀할 수 있다.
+
+![](https://i.imgur.com/A1ZJ1mY.png)
+

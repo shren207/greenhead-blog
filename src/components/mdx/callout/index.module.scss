@@ -11,7 +11,11 @@
   }
 
   b {
-    @include scale(font-size, 12px);
+    font-size: 16px;
+
+    @include on-mobile {
+      @include scale(font-size, 12px);
+    }
   }
 
   // 1️⃣ note 타입

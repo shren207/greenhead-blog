@@ -1,14 +1,16 @@
 ---
-title: "[RN] iOS 인앱 결제 기능넣기 1️⃣"
+title: "[RN] iOS 인앱 결제 추가하기"
 date: 2024-03-25 17:03:33
 category: til
 thumbnail: "react"
-description: '인앱 결제 기능을 넣기 위해, 개발 외적으로 해주어야 하는 것들에 대해 알아보자.'
+description: 'react-native-iap를 사용해서 iOS 인앱 결제를 추가해보자.'
 draft: false
 ---
 
 import Layout from '/src/templates/blog-post';
 export default Layout;
+
+import videoSrc from '/content/assets/videos/2024-03-25.mp4'
 
 ## 개요
 
@@ -35,10 +37,10 @@ export default Layout;
 
 [iOS 15 호환성 목록](https://support.apple.com/ko-kr/guide/iphone/iphe3fa5df43/15.0/ios/15.0)을 살펴보면, 2015년에 출시된 <b>iPhone 6s</b>까지도 iOS 15를 지원한다. 즉, StoreKit 2 API를 지원한다.
 
-약 10년 전 출시된 기기까지도 iOS 15를 지원하니까, 호환성 이슈는 엄청 크지는 않을 것이다... <del>제발</del>
+약 10년 전 출시된 기기까지도 iOS 15를 지원하니까, 호환성 이슈는 엄청 크지는 않을 것이다.
 
 
-## 방법
+## 🅰️ 개발 외적으로 해주어야 하는 것들
 
 ### 1️⃣ 애플 개발자 콘솔에서 앱 등록하기
 
@@ -138,9 +140,233 @@ export default Layout;
 
 `설정 > App Store > 샌드 박스 계정` 항목에, 방금 생성한 샌드 박스 계정을 등록한다.
 
-## 🤔 다음은?
+## 🅱️ 코드 작성
 
-개발 외적으로 해주어야 하는 것은 모두 완료되었다.
+이제 개발 외적으로 해주어야 할 작업은 마무리되었다. 이번에는 `react-native-iap` 라이브러리를 사용하여 어떻게 코드를 작성해야 하는 지 알아보자.
 
-글이 길어질 것 같아, 코드를 작성하는 부분은 다음 포스트에서 다루도록 하겠다...
+프로젝트를 생성해보자. 테스트 환경은 다음과 같다.
+
+```
+[iOS]
+- ruby: 2.7.8
+- cocoapods: 1.15.2
+
+[JS]
+- react-native: 0.73.6
+- react-native-iap: `12.13.0`
+```
+
+
+<Callout variant="info">
+  <b>🤔 `ruby`와 `cocoapods`이란?</b>
+  <br />
+
+  사실 RN 개발자라면 무엇인지 아실 테지만, 이들은 iOS 환경 설정, 앱의 의존성과 관련되어 있다.
+  <br />
+  ruby는 프로그래밍 언어로, iOS 개발에 직접적으로 사용되는 언어는 아니다. (직접적으로 사용되는 언어는 objective-c, swift) 하지만 cocoapods이 ruby로 작성되었기 때문에, cocoapods을 사용하기 위해서는 반드시 ruby가 설치되어야 한다.
+
+  JS로 비교하자면, node.js와 비슷한 역할을 담당한다고 생각하면 된다.
+  <br />
+  cocoapods는 iOS 앱의 의존성 관리자이다. 카메라, 인앱 결제, 위치기반 서비스 등의 iOS 네이티브 기능을 지원하는 라이브러리를 사용하고 싶다면, 아무리 개발 환경이 RN이라고 해도 cocoapods를 사용해서 해당 라이브러리를 관리해야 한다.
+
+  JS로 비교하자면, NPM과 비슷한 역할을 담당한다고 생각하면 된다.
+</Callout>
+
+`App.tsx` 파일을 다음과 같이 작성한다.
+
+
+```tsx
+import {
+  IapIosSk2,
+  initConnection,
+  ProductPurchase,
+  requestPurchase,
+  setup,
+  useIAP,
+  withIAPContext,
+} from 'react-native-iap';
+
+const ITEM_SKUS = [
+  'new.item1',
+  'new.item2',
+  'new.item3',
+  'new.item4',
+  'phg_item',
+  'phg_item2',
+  'phg_item3',
+  'green_item',
+];
+
+function App(): React.JSX.Element {
+  const { products, getProducts, finishTransaction, currentPurchase } = useIAP();
+
+  const buy = async (sku: string) => {
+    try {
+      const result = await requestPurchase({
+        sku,
+        andDangerouslyFinishTransactionAutomaticallyIOS: false, // requestPurchase 호출 후 자동으로 finishTransaction을 호출할지 여부
+      });
+      console.log(result);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const refund = async (sku: string) => {
+    try {
+      const result = await IapIosSk2.beginRefundRequest(sku); // 반환값: 'success' | 'userCancelled'
+      console.log(result);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      // 결제 API로 StoreKit 2를 사용 (인앱 환불 기능을 사용하기 위함)
+      setup({storekitMode: 'STOREKIT2_MODE'});
+
+      await initConnection();
+      await getProducts({skus: ITEM_SKUS});
+    })();
+  }, [getProducts]);
+
+  useEffect(() => {
+    const checkCurrentPurchase = async (
+      purchase: ProductPurchase,
+    ): Promise<void> => {
+      if (purchase) {
+        try {
+          console.log(JSON.stringify(purchase, null, 2));
+          const ackResult = await finishTransaction({purchase});
+          // andDangerouslyFinishTransactionAutomaticallyIOS 값이 false이기 때문에,
+          // requestPurchase 호출 후 finishTransaction을 수동으로 호출해야만 결제가 완료된다.
+          console.log(JSON.stringify(ackResult, null, 2));
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    };
+
+    if (currentPurchase) {
+      checkCurrentPurchase(currentPurchase);
+    }
+  }, [currentPurchase, finishTransaction]);
+
+  // 상품 정보 확인
+  console.log(JSON.stringify(products, null, 2));
+
+  return (
+    <SafeAreaView>
+      <StatusBar />
+      <FlatList
+        data={ITEM_SKUS}
+        keyExtractor={item => item}
+        renderItem={({item: sku}) => (
+          <View>
+            <Button title={`${sku} 구매하기`} onPress={() => buy(sku)} />
+            <Button title={`${sku} 환불하기`} onPress={() => refund(sku)} />
+          </View>
+        )}
+      />
+    </SafeAreaView>
+  );
+}
+
+export default withIAPContext(App);
+```
+
+위 코드에서 편의상 스타일과 관련된 코드는 제거했지만, UI는 다음과 같이 만들어 주었다.
+
+![](https://i.imgur.com/V57caox.jpeg)
+
+`products` 값은 다음과 같이 출력된다.
+
+```json
+ [
+  {
+    "title": "new.item1",
+    "productId": "new.item1",
+    "description": "",
+    "type": "iap",
+    "price": "1100",
+    "localizedPrice": "￦1,100",
+    "currency": "KRW"
+  },
+  {
+    "title": "new.item2",
+    "productId": "new.item2",
+    "description": "",
+    "type": "iap",
+    "price": "3300",
+    "localizedPrice": "￦3,300",
+    "currency": "KRW"
+  },
+  ...
+  {
+    "title": "phg_item",
+    "productId": "phg_item",
+    "description": "",
+    "type": "iap",
+    "price": "4400",
+    "localizedPrice": "￦4,400",
+    "currency": "KRW"
+  }
+]
+```
+
+나열된 상품들 중 `new.item1`을 <b>구매</b>해보자.
+
+<video width="50%" height="auto" controls>
+  <source src={videoSrc} type="video/mp4" />
+</video>
+
+구매 버튼을 누른 후, 최종적으로 승인 버튼까지 눌러야만 `requestPurchase` 메서드의 콜백이 호출된다.
+
+`requestPurchase` 메서드가 반환하는 값은 다음과 같은 구조를 갖는다.
+
+```json
+{
+  "productId": "new.item1",
+  "transactionId": "2000000556433469",
+  "transactionDate": 1711527550206,
+  "transactionReceipt": "",
+  "purchaseToken": "",
+  "quantityIOS": 1,
+  "originalTransactionDateIOS": 1711527550206,
+  "originalTransactionIdentifierIOS": 2000000556433469,
+  "verificationResultIOS": "eyJhb...qoUPmfQ",
+  "appAccountToken": "",
+  "transactionReasonIOS": "PURCHASE"
+}
+```
+
+<Callout variant="warning">
+  <b>⚠️ 실제 값은 JSON 문자열이 아니다!</b>
+  <br />
+  <br />
+  실제 값은 JSON 문자열이 아닌 실제 JS 객체이다. 가독성을 위해 `JSON.stringify` 메서드를 사용하였을 뿐이다.
+</Callout>
+
+<Callout variant="note">
+  <b>🤔 `purchaseReceipt`, `purchaseToken`이 빈 문자열인 이유</b>
+  <br />
+  <br />
+  Storekit 2 이전의 API를 사용하는 이전 방식의 경우, 구매 영수증을 수동을 검증하는 로직을 개발자가 작성했어야 했다.
+  따라서 영수증 정보를 의마하는 인코딩된 문자열을 디코딩하여 검증하는 과정이 필수적이었다고 한다.
+  <br />
+  하지만 StoreKit 2 API를 사용하는 경우 이러한 과정이 자동으로 처리되기 때문에, 사용 목적이 없어진 `purchaseReceipt`와 `purchaseToken` 필드는 단순 legacy로서 남아있기 때문이다.
+  <br />
+  ![](https://i.imgur.com/Ncw3vof.png)
+</Callout>
+
+이후에는 `finishTransaction` 메서드를 호출하여 결제를 완료해야 한다.
+
+<b>환불</b>의 경우도 마찬가지로, 환불 버튼을 누른 후, 최종적으로 승인 버튼까지 눌러야만 `beginRefundRequest` 메서드의 콜백이 호출된다.
+
+## 🙂 느낀 점
+
+실제 앱 스토어에서 판매 중인 앱에서 테스트한 것이 아니라 샌드박스 환경에서 테스트한 것이긴 하지만, <b>인앱 결제</b>를 구현하는 것은 생각보다 어렵지 않았다.
+
+다만 <b>인앱 환불</b>을 사용하기 위해서는 StoreKit 2 API를 사용해야 하는데, 이는 iOS 15 이상의 기기에서만 지원한다는 점을 유의해야 한다.
 

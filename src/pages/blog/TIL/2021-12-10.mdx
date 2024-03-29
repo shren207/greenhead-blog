@@ -4,6 +4,7 @@ date: 2021-12-10 19:12:29
 category: til
 thumbnail: 'rest_client'
 draft: false
+description: 'VS Code 내에서 API 요청을 테스트해보자.'
 img: false
 ---
 
@@ -12,12 +13,16 @@ export default Layout;
 
 ![](https://i.imgur.com/azERzPm.png)
 
-흔히들 쓰는 **Postman** 은 간단히 쓸 수 있는 API 테스트 툴이지만 몇가지 문제점이 있다.
+API 테스트 도구 중 가장 유명한 것으로 [Postman](https://www.postman.com/)이 있다.
 
-1. 요청의 저장이 불편하며, 저장해도 날라가는 경우가 종종 있다.
-2. 반복되는 endpoint를 일일이 다 써줘야 한다.
+사용법도 간편하고 많은 기능을 제공하는 데다, HTTP 뿐만 아니라 GraphQL, WebSocket 등 다양한 프로토콜을 지원하기 때문에 웹 개발자들한테 많은 사랑을 받고 있다.
 
-VSC 익스텐션인 `REST client` 는 앞서 설명한 Postman의 단점을 해결하였으며, 사용법 또한 간단해서 가볍게 정리해보고자 한다.
+사실 Postman만 사용해도 큰 문제는 없을 테지만, 만약 코드 작성과 API 테스트를 병행하고 있다면 필연적으로 2개의 창을 번갈아가며 확인해야 할 것이다.
+
+1. 코드 에디터 (WebStorm, VS Code 등)
+2. Postman (웹페이지 혹은 응용 프로그램)
+
+만약 [VS Code](https://code.visualstudio.com/)를 사용한다면, 확장 프로그램 중 하나인 `REST client`를 사용할 수 있다.
 
 ## 사용법
 

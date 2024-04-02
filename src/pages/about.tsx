@@ -1,3 +1,4 @@
+import Defaults from '/content/__about/defaults';
 import Resume from '/content/__about/resume.mdx';
 import { rhythm } from '../utils/typography';
 
@@ -13,7 +14,7 @@ export default function About() {
         )}`,
       }}
     >
-      <Resume />
+      <Resume components={Defaults} />
     </div>
   );
 }

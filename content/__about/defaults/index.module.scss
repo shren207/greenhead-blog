@@ -1,0 +1,19 @@
+.customH1 {
+  font-size: 80px;
+  border-bottom: none;
+  margin-bottom: 0;
+
+  @include on-mobile {
+    @include scale(font-size, 40px);
+  }
+}
+
+.introduction {
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.5;
+
+  @include on-mobile {
+    @include scale(font-size, 16px);
+  }
+}

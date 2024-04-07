@@ -1,0 +1,112 @@
+---
+title: "[Linux] 검색 경로와 프로그램 실행"
+date: 2024-04-07 13:04:33
+category: til
+thumbnail: 'linux'
+description: homebrew로 설치한 프로그램이 인식되지 않는다면 linux 검색 경로를 살펴보도록 하자.
+draft: false
+---
+
+import Layout from '/src/templates/blog-post';
+export default Layout;
+
+## 개요
+
+![](https://i.imgur.com/6lXEsmM.jpeg)
+
+
+나는 React Native의 <b>Ruby Version Manager</b>로 [rvm](https://rvm.io/)을 사용하고 있었으나, CTO님의 적극적인 영업으로 [rbenv](https://github.com/rbenv/rbenv)를 대신 사용해보기로 하였다.
+
+실제로 `rvm`은 `homebrew`로 설치할 수 없기에 별도 복잡한 설치과정이 필요한데다, 사용법도 제법 복잡하다고 느끼고는 있었다.
+
+<b>Node Version Manager</b>로 [nvm](https://github.com/nvm-sh/nvm)을 사용하고 있던 내게 [n](https://github.com/tj/n)이라는 <u>훨씬 가볍고 (거의 10배 차이)</u>, <u>사용법이 무척 간단</u>한 대체제를 소개해주셨던 CTO님이셨기 때문에, 이번에도 믿고 바꿔보기로 하였다. 🫡
+
+## 문제
+
+```bash
+$ brew install rbenv
+$ rbenv install 2.7.8
+```
+
+터미널에 `brew install rbenv` 명령어를 사용하여 `rbenv`를 설치하였고, 이를 통해 ruby `2.7.8` 버젼을 설치하였다.
+
+그런데 🚨<b>문제</b>가 있다. `rbenv`로 설치한 ruby를 전혀 인식하지 못한다는 것이다.
+
+![](https://i.imgur.com/fo8JrKi.png)
+
+위 사진의 <b>starship</b> 프롬프트를 보면, `rbenv`로 설치한 2.7.8 버젼의 ruby는 전혀 인식하지 못하고, 예전에 `rvm`으로 설치한 2.7.6 버젼의 ruby를 여전히 인식하고 있는 것을 확인할 수 있다.
+
+<Callout variant="info">
+  <b>🤔 starship이란?</b>
+  <br />
+  <br />
+  ![](https://i.imgur.com/mZpsvtM.png)
+  <b>[starship](https://starship.rs/)</b>은 <u>터미널 프롬프트를 입맛에 맞게 꾸밀 수 있도록 해주는 툴</u>이다.
+  <br />
+  나의 경우는 프롬프트에 <u>ip 주소</u>, <u>브랜치 이름</u> 등 다양한 정보를 표시할 수 있도록 했는데, 그 중 하나가 <b>현재 사용 중인 ruby 버젼</b>이다.
+</Callout>
+
+## 해결
+
+![](https://i.imgur.com/r206LmE.png)
+
+최근 읽고 있는 책들 중 하나인 [효율적인 리눅스 명령어 사용의 기술](https://m.yes24.com/Goods/Detail/123878910)이라는 책에서 <b>리눅스의 검색 경로<sup>search path</sup></b>에 대해 설명하는 부분이 있다.
+
+리눅스에서는 프로그램를 실행할 때, <u>해당 프로그램이 어디에 위치해 있는지를 알기 위해 <b>검색 경로</b>를 참조</u>한다.
+
+<b>검색 경로</b>는 콜론(`:`)으로 구분된 여러 디렉토리들의 집합이며, 이를 통해 프로그램이 어디에 위치해 있는지를 알 수 있다.
+
+프로그램을 검색할 때는 검색 경로 <b>앞에서부터 순차적으로 탐색</b>하며, 만약 동일한 프로그램이 검색 경로에서 2개 이상 존재하더라도 <u>가장 먼저 발견한 프로그램만을 실행</u>하기 때문에, 이 경우 <b>후순위에 위치한 프로그램은 실행되지 않는다!</b>
+
+다음과 같이 `echo $PATH` 명령어를 통해 현재 사용자의 검색 경로를 확인할 수 있다.
+
+```bash
+> echo $PATH | tr : "\n" # 콜론을 개행문자로 치환하여 보기 편하게 출력
+/Users/greenhead/.rvm/gems/ruby-2.7.6/bin
+/Users/greenhead/.rvm/gems/ruby-2.7.6@global/bin
+/Users/greenhead/.rvm/rubies/ruby-2.7.6/bin
+/Users/greenhead/.rbenv/shims
+/opt/homebrew/opt/ccache/libexec
+/Users/greenhead/.deno/bin
+/Users/greenhead/.bun/bin
+/opt/local/bin
+/opt/local/sbin
+/opt/homebrew/bin
+/opt/homebrew/sbin
+...
+```
+
+여기서, `rbenv`로 설치한 ruby의 경로인 `/Users/greenhead/.rbenv/shims`가 검색 경로에 존재하는 것은 맞지만, `rvm`으로 설치한 ruby의 경로가 이보다 앞서기 때문에 `rvm`으로 설치한 ruby만 인식할 수 있었던 것이다.
+
+그렇다면 <u>`rvm` 설치 경로를 검색경로에 추가하는 스크립트를 <b>제거</b></u>해야 한다. 경험상 해당 프로그램을 검색 경로에 추가하는 스크립트는 셸 초기화파일인 `$HOME/.zshrc`에 작성되어 있는 경우가 많았다. (만약 `bash` 셸을 사용하고 있다면 `$HOME/.bashrc`)
+
+```bash
+source "$HOME/.rvm/scripts/rvm"
+```
+
+실제로 `$HOME/.zshrc` 파일을 확인해보니, 위와 같은 스크립트가 존재하였다. 해당 스크립트를 제거한 뒤, 변경된 내용을 적용하기 위해 다음과 같이 source 명령어를 입력한다.
+
+```bash
+> source $HOME/.zshrc # 혹은, 터미널을 재시작하여 변경된 내용을 적용할 수도 있음
+```
+
+우선 `echo $PATH` 명령어를 사용해서 다시 검색 경로를 확인해보자.
+
+```bash
+> echo $PATH | tr : "\n"
+/Users/greenhead/.rbenv/shims     # 오직 rbenv의 경로만이 검색 경로에 존재함
+/opt/homebrew/opt/ccache/libexec
+/Users/greenhead/.deno/bin
+/Users/greenhead/.bun/bin
+/opt/local/bin
+/opt/local/sbin
+/opt/homebrew/bin
+/opt/homebrew/sbin
+...
+```
+
+아까와는 달리, `rvm` 관련 경로가 검색 경로에 미포함된 것을 확인할 수 있다.
+
+![](https://i.imgur.com/cMGuMz4.png)
+
+따라서 위 사진과 같이, 정상적으로 `rbenv`로 설치한 ruby 버젼이 인식되는 것을 확인할 수 있다. 👍

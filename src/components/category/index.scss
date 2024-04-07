@@ -3,12 +3,14 @@
 .category-container {
   @include scale(column-gap, 6px);
   @include scale(padding, 6px 20px);
+  row-gap: 0.5rem;
   position: sticky;
   position: -webkit-sticky;
   display: flex;
   top: 0;
   line-height: 0;
   white-space: nowrap;
+  flex-wrap: wrap;
   overflow-x: scroll;
   -ms-overflow-style: none; // IE 10+
   overflow: -moz-scrollbars-none; // Firefox
@@ -17,6 +19,7 @@
   @include on-mobile {
     @include scale(padding, 5px 10px);
     @include scale(column-gap, 5px);
+    @include scale(row-gap, 0.35rem);
   }
 
   .item {

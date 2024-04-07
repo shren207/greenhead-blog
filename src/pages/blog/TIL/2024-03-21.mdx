@@ -10,11 +10,25 @@ draft: false
 import Layout from '/src/templates/blog-post';
 export default Layout;
 
+![](https://i.imgur.com/BVOkHPr.png)
+
+`input` 태그는 웹 개발에서 <b>폼(form)</b>을 만들 때 필수적으로 사용하는 태그이다.
+
+실제로, [Advanced Web Ranking](https://www.advancedwebranking.com/)라는 SEO 솔루션을 제공하는 사이트에서 작성한 포스트 중 하나에서 <b>약 천백만 개의 웹사이트</b>를 대상으로 <u>HTML 태그 사용 빈도</u>를 확인한 결과, `input` 태그는 약 <b>62%</b>의 빈도로 사용되고 있다고 한다.
+
+![](https://i.imgur.com/D9U61am.png)
+> 2020년 10월 기준. [해당 포스트 링크](https://www.advancedwebranking.com/seo/html-study)
+
+그만큼 많이 사용되는 `input` 태그이지만, 기본적으로 제공되는 UI가 많이 못생겼다는 문제가 있다.. 😢
+
+`input` 태그는 `type` 어트리뷰트를 통해 다양한 타입의 입력을 받도록 할 수 있다. 그 중 `type`이 `number` , `file`인 `input` 태그를 커스터마이징하는 방법에 대해 알아보자.
 
 ## 1️⃣ type = number
-<img src="https://i.imgur.com/BKtsf97.png" />
+<div align="center">
+  ![](https://i.imgur.com/QNA0tTj.png)
+</div>
 
-`<input type="number" />`과 같이 `type` 어트리뷰트가 number인 `input` 태그는 우측에 `chevron`이 기본적으로 존재한다.
+`<input type="number" />`과 같이 `type` 어트리뷰트가 `number`인 `input` 태그는 우측에 `chevron`이 기본적으로 존재한다.
 
 보통은 위 사진에서처럼 기본적으로 제공하는 `chevron` 아이콘을 제거하고, 직접 커스텀 `chevron` 아이콘 혹은 다른 UI를 변경하는 경우가 많다.
 
@@ -33,11 +47,11 @@ input[type="number"]::-webkit-inner-spin-button {
 
 
 ## 2️⃣ type = file
-<img src="https://i.imgur.com/vVz4avS.png" />
+<div align="center">
+  ![](https://i.imgur.com/CbLYIqd.png)
+</div>
 
 `type=number` 일때 우측 `chevron` 아이콘과 마찬가지로, `type=file`일때의 `input` 태그의 기본 UI 또한 상당히 못생겼다.
-
-<img src="https://i.imgur.com/cduWjYC.png" />
 
 `type=file`인 `input` 태그를 커스터마이징할 때는, 보통 다음과 같은 방식을 즐겨 사용한다.
 
@@ -75,5 +89,7 @@ input[type="number"]::-webkit-inner-spin-button {
 
 최종적으로, 아래 사진과 비슷하게 input 태그를 커스텀할 수 있다.
 
-![](https://i.imgur.com/A1ZJ1mY.png)
+<div align="center">
+  ![](https://i.imgur.com/A1ZJ1mY.png)
+</div>
 

@@ -1,0 +1,46 @@
+---
+title: "[Intellij] 사이드바 폰트 크기 조절하기"
+date: 2024-04-08 10:04:08
+category: tool
+thumbnail: 'webstorm'
+draft: false
+---
+
+import Layout from '/src/templates/blog-post';
+export default Layout;
+
+![](https://i.imgur.com/WcrMVyg.png)
+위 사진과 같이, Jetbrains의 IDE는 크게 2가지 종류로 폰트를 나눈다.
+
+1. IDE 시스템 폰트
+2. 코드 에디터 폰트
+
+나의 경우, 지금까지 <u>에디터 폰트 크기</u>를 변경하는 방법은 알고 있었지만, <u>시스템 폰트 크기</u>를 변경하는 것은 IDE에서 지원하지 않는 줄 알고 계속 작은 폰트 사이즈로 개발을 하고 있었다... 😭
+
+그러다가 우연히 시스템 폰트 크기를 변경하는 방법을 알게 되어, 잊지 않고자 간단히 정리해 두려고 한다.
+
+## ✅ 폰트 크기 수정 방법
+
+[여기 링크](https://stackoverflow.com/questions/39216427/how-to-increase-menu-and-tab-font-size-in-intellij-jetbrains-pycharm-phpstorm)를 참조하니까, `Appearance & Behavior > App` 에서 `Use Custom font`를 활성화한 뒤, 폰트 사이즈를 결정하면 문제가 해결되는 것이었다...
+
+
+### 1️⃣ 시스템 폰트 크기 수정 (사이드바 영역 포함)
+
+```bash
+Appearance & Behavior > Appearance > "Use custom font" 체크
+```
+
+<img src="https://i.imgur.com/YaANsVy.png" />
+
+### 2️⃣ 에디터 폰트 크기 수정
+
+```bash
+Editor > Font
+```
+
+<img src="https://i.imgur.com/ejQ89z2.png" />
+
+
+## 🔗 레퍼런스
+
+- [Stack Overflow 글](https://stackoverflow.com/questions/39216427/how-to-increase-menu-and-tab-font-size-in-intellij-jetbrains-pycharm-phpstorm)

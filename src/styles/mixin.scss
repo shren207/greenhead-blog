@@ -1,24 +1,32 @@
-@use "sass:map";
-@use "sass:list";
-@use "sass:math";
-@use "sass:string";
+@use 'sass:map';
+@use 'sass:list';
+@use 'sass:math';
+@use 'sass:string';
 
 $mobile-contents-width: 720px;
 
 $one-px: math.div(1px, $mobile-contents-width) * 100;
 
 $digit-chars-map: (
-  "0": 0,
-  "1": 1,
-  "2": 2,
-  "3": 3,
-  "4": 4,
-  "5": 5,
-  "6": 6,
-  "7": 7,
-  "8": 8,
-  "9": 9,
+  '0': 0,
+  '1': 1,
+  '2': 2,
+  '3': 3,
+  '4': 4,
+  '5': 5,
+  '6': 6,
+  '7': 7,
+  '8': 8,
+  '9': 9,
 );
+
+@function to-length($value, $unit) {
+  @if $unit != 'px' {
+    @error "Expected 'px', but got #{$unit}.";
+  }
+
+  @return $value * 1px;
+}
 
 @function to-number($value) {
   @if type-of($value) == 'number' {
@@ -29,57 +37,75 @@ $digit-chars-map: (
 
   $result: 0;
   $digits: 0;
-  $minus: str-slice($value, 1, 1) == '-';
+  $minus: string.slice($value, 1, 1) == '-';
 
-  @for $i from if($minus, 2, 1) through str-length($value) {
-    $char: str-slice($value, $i, $i);
+  @for $i from if($minus, 2, 1) through string.length($value) {
+    $char: string.slice($value, $i, $i);
 
-    @if not (index(map-keys($digit-chars-map), $char) or $char == '.') {
-      @return to-length(if($minus, -$result, $result), str-slice($value, $i))
+    @if not(list.index(map.keys($digit-chars-map), $char) or $char == '.') {
+      @return to-length(
+        if($minus, -$result, $result),
+        string.slice($value, $i)
+      );
     }
 
     @if $char == '.' {
       $digits: 1;
     } @else if $digits == 0 {
-      $result: $result * 10 + map-get($digit-chars-map, $char);
+      $result: $result * 10 + map.get($digit-chars-map, $char);
     } @else {
       $digits: $digits * 10;
-      $result: $result + math.div(map-get($digit-chars-map, $char), $digits);
+      $result: $result + math.div(map.get($digit-chars-map, $char), $digits);
     }
   }
 
   @return if($minus, -$result, $result);
 }
 
-@function to-length($value, $unit) {
-  $units: ('px': 1px, 'cm': 1cm, 'mm': 1mm, '%': 1%, 'ch': 1ch, 'pc': 1pc, 'in': 1in, 'em': 1em, 'rem': 1rem, 'pt': 1pt, 'ex': 1ex, 'vw': 1vw, 'vh': 1vh, 'vmin': 1vmin, 'vmax': 1vmax);
-
-  @if not index(map-keys($units), $unit) {
-    @error "Unknown unit #{$unit}.";
-  }
-
-  @return $value * map-get($units, $unit);
+@function remove-unit($value) {
+  @return math.div($value, ($value * 0 + 1));
 }
 
-@function is-digit($str) {
-  @if type-of($str) == "string" {
-    @return map.get($digit-chars-map, $str) != null;
+@function calc-viewport-width($value) {
+  @if type-of($value) == 'number' and math.unit($value) != '' {
+    @if math.unit($value) == 'px' {
+      @return remove-unit($value * $one-px * 2) + vw;
+    } @else {
+      @error "Expected 'px', but got #{math.unit($value)}.";
+    }
+  } @else {
+    @return $value;
+  }
+}
+
+@function is-digit($char) {
+  @if type-of($char) == 'string' {
+    @return map.get($digit-chars-map, $char) != null;
   } @else {
     @return false;
   }
 }
 
 @function tokenization($str) {
-  @if type-of($str) == "string" {
+  @if type-of($str) == 'string' {
     $tokens: ();
     $cursor: 0;
+
+    @if string.index($str, '(') == null or string.index($str, ')') == null {
+      // $str이 translate(), filter() 등의 CSS 함수가 아닌 경우
+      @return $tokens;
+    }
+    @if string.index($str, 'rem') != null or string.index($str, 'em') != null {
+      // $str이 px이 아닌 rem, em 단위를 사용하는 경우
+      @error "Expected 'px', but got something else.";
+    }
 
     @for $i from 1 through string.length($str) {
       $curr: string.slice($str, $i, $i);
       $next: string.slice($str, $i + 1, $i + 1);
 
-      @if $curr == "p" and $next == "x" {
-        $chars: "";
+      @if $curr == 'p' and $next == 'x' {
+        $chars: '';
         $is-paused: false;
 
         @for $j from $i - 1 through 0 {
@@ -88,7 +114,7 @@ $digit-chars-map: (
           } @else {
             $curr: string.slice($str, $j, $j);
 
-            @if is-digit($curr) or $curr == "." or $curr == "-" {
+            @if is-digit($curr) or $curr == '.' or $curr == '-' {
               $chars: $curr + $chars;
             } @else {
               $is-paused: true;
@@ -96,10 +122,10 @@ $digit-chars-map: (
           }
         }
 
-        $tokens: append($tokens, (
-          $chars + "px",
-          $i - string.length($chars),
-        ));
+        $tokens: list.append(
+          $tokens,
+          ($chars + 'px', $i - string.length($chars))
+        );
       }
     }
 
@@ -109,50 +135,43 @@ $digit-chars-map: (
   }
 }
 
-@function remove-unit($value) {
-  @return math.div($value, ($value * 0 + 1));
-}
-
-@function calc-viewport-width($value) {
-  @if type-of($value) == "number" and unit($value) == "px" {
-    @return remove-unit($value * $one-px * 2) + vw
-  } @else {
-    @return $value;
-  }
-}
-
 @mixin scale($property, $values) {
   $attributes: ();
   $mobile-attributes: ();
 
   @each $value in $values {
-    @if type-of($value) == "string" {
+    @if type-of($value) == 'string' {
       $tokens: tokenization($value);
       $cursor: 1;
-      $result: "";
+      $result: '';
       $expression: $value;
 
       @each $token in $tokens {
-        $raw: nth($token, 1);
-        $start-index: nth($token, 2);
+        $raw: list.nth($token, 1);
+        $start-index: list.nth($token, 2);
         $viewport-width: calc-viewport-width(to-number($raw));
 
-        $part: string.slice($expression, $cursor, $start-index - 1) + $viewport-width;
+        $part: string.slice($expression, $cursor, $start-index - 1) +
+          $viewport-width;
         $cursor: $start-index + string.length($raw);
         $result: $result + $part;
       }
 
-      $result: $result + string.slice($expression, $cursor, string.length($expression));
+      $result: $result +
+        string.slice($expression, $cursor, string.length($expression));
 
-      $attributes: append($attributes, $value);
-      $mobile-attributes: append($mobile-attributes, string.unquote($result));
-    } @else if type-of($value) == "number" {
+      $attributes: list.append($attributes, $value);
+      $mobile-attributes: list.append(
+        $mobile-attributes,
+        string.unquote($result)
+      );
+    } @else if type-of($value) == 'number' {
       $viewport-width: calc-viewport-width($value);
-      $attributes: append($attributes, $value);
-      $mobile-attributes: append($mobile-attributes, $viewport-width);
+      $attributes: list.append($attributes, $value);
+      $mobile-attributes: list.append($mobile-attributes, $viewport-width);
     } @else {
-      $attributes: append($attributes, $value);
-      $mobile-attributes: append($mobile-attributes, $value);
+      $attributes: list.append($attributes, $value);
+      $mobile-attributes: list.append($mobile-attributes, $value);
     }
   }
 

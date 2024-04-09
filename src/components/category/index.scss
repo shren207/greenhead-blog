@@ -19,7 +19,7 @@
   @include on-mobile {
     @include scale(padding, 5px 10px);
     @include scale(column-gap, 5px);
-    @include scale(row-gap, 0.35rem);
+    row-gap: 0.35rem;
   }
 
   .item {

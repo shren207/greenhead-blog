@@ -1,0 +1,31 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  font-family: 'Poppins', Helvetica, sans-serif;
+  color: #121517;
+  font-size: 16px;
+}
+
+a {
+  text-decoration: none;
+}
+
+img,
+canvas {
+  vertical-align: middle;
+}
+
+a,
+button {
+  cursor: pointer;
+  appearance: none;
+  border: none;
+  font: inherit;
+}

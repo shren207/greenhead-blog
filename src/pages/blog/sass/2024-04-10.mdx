@@ -1,0 +1,758 @@
+---
+title: "[Sass] viewport에 반응하는 스타일 만들기"
+date: 2024-04-10 20:04:52
+category: Sass
+thumbnail: sass
+description: translate(), filter() 등의 함수도 처리할 수 있는 SassScript를 작성해보자.
+draft: false
+---
+
+import Layout from '/src/templates/blog-post';
+export default Layout;
+import ImageSrc from '/content/assets/images/2024-04-10.gif'
+
+![](https://i.imgur.com/1zXCf7C.png)
+
+데브시스터즈 기술블로그에 ["쪼그라드는 웹페이지"](https://tech.devsisters.com/posts/shrinking-webpage/)라는 포스트가 있다. 해당 포스트에서는 CSS 전처리기 Sass를 사용하여, px 단위를 사용하여 반응형 UI를 만들 수 있는 방법을 소개하고 있는데, 포스트에서는 구체적인 동작 방식을 다음과 같이 설명하고 있다.
+
+
+```
+- PC 최소 사이즈보다 작은 화면에서는 모바일(태블릿) 화면을 보여준다
+- 태블릿 정도 크기에서는 모바일 화면을 보여주고 좌우에 여백을 준다 (PC 화면처럼)
+- 모바일 화면은 하나만 작업해서 기준 사이즈보다 작은 기기에서는 화면을 쪼그라뜨린다.
+```
+
+
+위와 같이 동작하기 위해 작성한 SassScript는 대부분의 경우 완벽하게 동작하나, 포스트 본문에도 언급되어 있듯이 프로퍼티 값으로 `translate()`, `filter()`와 같은 <u>CSS 함수를 받는 경우는 대응할 수 없다</u>는 한계가 있다.
+
+<Callout variant="note">
+  <b>🤔 왜 CSS 함수를 받는 경우를 대응할 수 없을까?</b>
+  <br />
+  <br />
+  `translate()`, `filter()`와 같은 CSS 함수는 Sass에서 `number`가 아닌 `string` 타입으로 취급되는데, 데브시스터즈 팀에서 작성한 SassScript는 오직 타입이 `number`인 경우만 처리하고 있기 때문이다. 해당 내용은 아래에서 좀 더 자세히 다루도록 하겠다.
+</Callout>
+
+<b>하지만</b> 위 한계를 극복한, 즉 <u>값으로 <b>CSS 함수</b>를 받는 경우도 <b>정상적으로 처리</b>될 수 있도록 하는 SassScript</u>를 작성하는 법을 동료분께 배울 수 있었는데, 이를 다뤄보도록 하겠다.
+
+
+## 분석
+
+우선, 코드의 대략적인 구조를 살펴보자.
+
+```scss
+@use 'sass:map';
+@use 'sass:list';
+@use 'sass:math';
+@use 'sass:string';
+
+$mobile-contents-width: 720px;
+
+$one-px: math.div(1px, $mobile-contents-width) * 100;
+
+$digit-chars-map: (
+  '0': 0,
+  '1': 1,
+  '2': 2,
+  '3': 3,
+  '4': 4,
+  '5': 5,
+  '6': 6,
+  '7': 7,
+  '8': 8,
+  '9': 9,
+);
+
+@function to-length($value, $unit) { ... }
+
+@function to-number($value) { ... }
+
+@function remove-unit($value) { ... }
+
+@function calc-viewport-width($value) { ... }
+
+@function is-digit($char) { ... }
+
+@function tokenization($str) { ... }
+
+@mixin scale($property, $values) { ... }
+```
+
+<Callout variant={"warning"}>
+  전체 코드가 약 200 줄에 달하므로 `@function`, `@mixin` 각각의 전체 코드는 아래에서 다룬다.
+</Callout>
+
+오직 scale @mixin 1개만 정의했던 데브시스터즈 코드와 달리 여러개의 유틸 함수를 추가로 정의한데다, 기존 scale @mixin 또한 내부 로직이 상당히 복잡해진 것을 확인할 수 있다...
+
+하지만 하나하나 살펴보면 그렇게 어려운 것은 아니다. 우선 유틸 함수를 차례로 분석하고, 마지막으로 scale @mixin을 분석해보도록 하자.
+
+
+## 모듈과 전역변수
+```scss
+@use 'sass:map';
+@use 'sass:list';
+@use 'sass:math';
+@use 'sass:string';
+```
+
+코드 최상단에는 위와같이 Sass의 built-in 모듈 4가지를 불러온다. 이를 통해 각 모듈이 제공하는 함수들을 사용할 수 있다.
+
+<Callout variant="info">
+  각 모듈에서 제공하는 모든 함수는, 자신과 완전 동일한 기능을 제공하는 전역 함수 또한 존재한다.
+  <br />
+  예를 들어, 문자열의 길이를 반환하는 <b>빌트인 모듈 함수</b> `string.length()`는 <b>전역 함수</b> `str-length()`와 <u>완전히 동일한 기능을 제공</u>한다. 어찌 보면 모듈 대신 전역 함수를 사용하는 것이 `@use`문을 사용할 필요도 없어서 더 좋아보인다.
+
+  <br />
+  ![](https://i.imgur.com/68O0sHt.png)
+  <b>하지만</b>, Sass 팀에서 <u>전역 함수의 사용 대신 모듈을 사용할 것을 권장</u>하고 있고, 미래에는 <u>전역 함수의 유지보수를 중단할 것</u>이라고 하였기 때문에, 신규 프로젝트에서 Sass를 사용하게 된다면 모듈을 사용하는 것이 좋을 것이다.
+</Callout>
+
+`@use` 문 다음에는 3개의 <b>전역 변수</b>를 선언하였다.
+
+```scss
+$mobile-contents-width: 720px;
+// PC 뷰 최소 `width`를 의미한다.
+// 이보다 viewport의 width가 작으면, 단위로 `px`대신 `vw`를 사용한다.
+
+$one-px: math.div(1px, $mobile-contents-width) * 100;
+// 모바일 뷰에서 사용할 기준단위이다.
+
+$digit-chars-map: (
+  '0': 0,
+  '1': 1,
+  '2': 2,
+  '3': 3,
+  '4': 4,
+  '5': 5,
+  '6': 6,
+  '7': 7,
+  '8': 8,
+  '9': 9,
+);
+// 숫자형 문자를 key로, 숫자를 value로 갖는 map이다.
+// 특정 값이 숫자형 문자인지 판별하기 위해 사용된다.
+```
+
+
+## 유틸함수
+
+### 1️⃣ to-length
+
+```scss
+@function to-length($value, $unit) {
+  @if $unit != 'px' {
+    @error "Expected 'px', but got #{$unit}.";
+  }
+
+  @return $value * 1px;
+}
+```
+
+`to-length` 함수는 바로 아래에서 다룰 `to-number` 함수 내부에서만 사용되며 `$value`, `$unit`를 인수로 받아 <u>단위가 포함된 숫자값</u>을 반환한다.
+
+```scss
+to-length(10, "px"); // 10px
+```
+
+각각의 <b>매개변수</b>는 다음을 의미한다.
+
++ `$value`: 단위가 존재하지 않는 순수 숫자값
++ `$unit`: 단위를 뜻하는 문자열
+
+<Callout variant="info">
+  <b>📝 Sass의 `number` 타입</b>
+  <br />
+  <br />
+  Sass에서 `number` 타입의 값은 2가지 형태로 표현할 수 있다.
+
+  - 1️⃣ 단위가 있는 경우: `10px`, `1.5rem`
+  - 2️⃣ 단위가 없는 경우: `5`, `10.31`
+
+  <br />
+  단위의 유무만 다를 뿐, 두 형태 전부 `number` 타입임을 명심하자.
+</Callout>
+
+### 2️⃣ to-number
+
+```scss
+@function to-number($value) {
+  @if type-of($value) == 'number' {
+    @return $value;
+  } @else if type-of($value) != 'string' {
+    @error "Expected a string, but got #{$value}.";
+  }
+
+  $result: 0;
+  $digits: 0;
+  $minus: string.slice($value, 1, 1) == '-';
+
+  @for $i from if($minus, 2, 1) through string.length($value) {
+    $char: string.slice($value, $i, $i);
+
+    // if문 🅰️
+    @if not(list.index(map.keys($digit-chars-map), $char) or $char == '.') {
+      @return to-length(
+        if($minus, -$result, $result),
+        string.slice($value, $i)
+      );
+    }
+
+    // if문 🅱️
+    @if $char == '.' {
+      $digits: 1;
+    } @else if $digits == 0 {
+      $result: $result * 10 + map.get($digit-chars-map, $char);
+    } @else {
+      $digits: $digits * 10;
+      $result: $result + math.div(map.get($digit-chars-map, $char), $digits);
+    }
+  }
+
+  @return if($minus, -$result, $result);
+}
+```
+
+
+`to-number` 함수는 숫자형 문자열 `$value`를 인수로 받아 진짜 숫자로 변환하여 반환하는 함수이다. 만약 값으로 진짜 숫자를 전달받는다면, 인수를 그대로 반환한다.
+
+```scss
+to-number("1.5");  // 1.5
+to-number("10px"); // 10px
+to-number(35);     // 35
+```
+
+<Callout variant="warning">
+  <b>🤔 굳이 `to-number` 함수가 필요한 것일까?</b>
+  <br />
+  <br />
+  JS에서는 다음 방법으로 `string` 타입의 값을 `number` 타입의 값으로 변환할 수 있다.
+
+  1. `new` 연산자 없이 `Number` 생성자 함수 사용
+  2. `parseInt`, `parseFloat` 함수 사용
+  3. `+` 단항 산술 연산자 사용
+  <br />
+  <b>하지만</b> Sass는 JS처럼 `string`을 `number`로 손쉽게 변환하는 방법을 지원하지 않기에, to-number와 같은 별도의 유틸 함수를 정의하여 사용하는 것이다.
+</Callout>
+
+Early Return 로직을 통과한 `$value`는 `string` 타입이며, `$result`, `$digits`, `$minus` 3가지 변수를 선언하였다.
+
+- `$result`: 숫자형 문자열 $value에서 단위를 제외한 순수 숫자값을 저장하는 변수
+- `$digits`: $result를 계산할 때 임시로 사용할 자릿수
+- `$minus`: 양수, 음수 여부를 boolean 값으로 저장하는 변수
+
+<Callout variant="warning">
+  JS에서 문자열은 <b>유사 배열 객체<sup>array-like object</sup></b>이므로, 문자열의 i번째 인덱스에 해당하는 문자에 접근하기 위해서는 `str[i]`와 같이 할 수 있지만, Sass에서는 그러한 방식을 지원하지 않기 때문에 `string.slice` 함수를 사용해야 한다.
+
+  ```scss
+  string.slice($value, $i, $i);
+  ```
+
+  위와 같이 string.slice 함수를 사용하면, 문자열 `$value`의 i번째 문자에 접근할 수 있다.
+</Callout>
+
+<Callout variant="error">
+  Sass는 인덱스가 1부터 시작한다!
+</Callout>
+
+이후 반복문이 시작되며, 내부 코드 블럭은 if문 🅰️와 🅱️로 나뉜다. 설명을 쉽게 하기 위해 먼저 🅱️부터 살펴보자.
+
+### if문 🅱
+
+```scss
+// if문 🅱️
+@if $char == '.' {
+  // 다음 순회에서는 소수 부분을 다룸.
+  // $digits을 사용해야 하므로 1로 초기화
+  $digits: 1;
+} @else if $digits == 0 {
+  // 정수 부분을 다루는 경우 ($digits 사용할 필요 ❌)
+  $result: $result * 10 + map.get($digit-chars-map, $char);
+} @else {
+  // 소수 부분을 다루는 경우 ($digits 사용할 필요 ✅)
+  $digits: $digits * 10;
+  $result: $result + math.div(map.get($digit-chars-map, $char), $digits);
+}
+```
+
+if문 🅱️는 <u>숫자형 문자열 $value에서 <b>순수 숫자</b>를 추출</u>하는 로직을 담당한다.
+
+if문 🅰️에서 <u>`$char`가 숫자가 아닌 경우 함수를 종료</u>하기 때문에, if문 🅱️에서 `$char`는 1️⃣숫자형 문자 또는 2️⃣`.`임이 <b>보장</b>되므로 추가로 예외 처리를 할 필요는 없다.
+
+아래 예시를 통해 위 로직을 이해해보자.
+
+```bash
+["32.14px"를 $value로 전달받는 경우]
+
+1) $char: 3     $digits: 0      $result: 3
+2) $char: 2     $digits: 0      $result: 32 (3 * 10 + 2)
+3) $char: .     $digits: 1      $result: 32
+4) $char: 1     $digits: 10     $result: 32.1 (32 + 0.1)
+5) $char: 4     $digits: 100    $result: 32.14 (32.1 + 0.04)
+
+$char가 "p"가 되는 순간 if문 🅰로 코드 흐름이 이동하며, 이때 $result는 32.14가 된다.
+````
+
+### if문 🅰️
+
+```scss
+// if문 🅰️
+@if not(list.index(map.keys($digit-chars-map), $char) or $char == '.') {
+  // $char가 숫자형 문자도 아니고, '.'도 아닌 경우
+  @return to-length(
+    if($minus, -$result, $result),
+    string.slice($value, $i)
+  );
+}
+```
+
+만약 현재 문자 `$char`가 number도 아니고, `.`도 아니라면, `$char`는 단위 문자열의 첫 번째 문자임을 의미한다. 즉, `$value`가 `40px`이라면 `$char`는 `p`, `"3rem"`이라면 `"r"`을 의미한다.
+
+`$char`가 단위 문자열의 첫 번째 문자라는 것은, 단위를 제외한 순수 숫자 부분은 전부 순회하여 그 처리결과를 `$result` 변수에 저장했음을 의미한다. 따라서 더 이상 반복문을 순회할 이유가 없으므로, 그 값을 `to-length` 함수에 넘긴다.
+
+---
+### 3️⃣ remove-unit
+
+```scss
+@function remove-unit($value) {
+  @return math.div($value, ($value * 0 + 1));
+}
+```
+
+[//]: # (`remove-unit`은 아래에서 다룰 `calc-viewport-width` 함수 내부에서만 사용된다.)
+
+해당 함수의 동작방식은 <b>제법 특이</b>한데, 인수로 전달받은 `$value`에서 `px` 단위를 제거한 순수 숫자값을 반환한다.
+
+```scss
+remove-unit(20px) -> 20
+```
+
+<i>🤔어떻게 숫자 값에서 단위만 깔끔하게 제거할 수 있는 것일까?</i> [공식 문서](https://sass-lang.com/documentation/modules/math/#other-functions)에서 `math.div` 함수를 어떻게 설명하고 있는 지 살펴보자.
+
+![](https://i.imgur.com/eKdYWec.png)
+
+```
+"Any units shared both numbers will be canceled out."
+```
+
+즉, 나눗셈의 두 숫자의 <u>단위가 서로 동일하다면 <b>상쇄되어 없어진다!</b></u>
+
+```scss
+math.div(1, 2);       // 0.5
+math.div(100px, 5px); // 20 (상쇄!)
+math.div(100px, 5);   // 20px
+math.div(100px, 5s);  // 20px/s
+```
+
+### 4️⃣ calc-viewport-width
+
+```scss
+@function calc-viewport-width($value) {
+  @if type-of($value) == "number" and unit($value) == "px" {
+    @return remove-unit($value * $one-px * 2) + vw
+  } @else {
+    @return $value;
+  }
+}
+```
+
+`calc-viewport-width` 함수는 인수로 전달받은 `$value`가 `number` 타입이고 단위가 `px`일 때, `$value`를 `vw` 단위로 변환하여 반환한다.
+
+변수 `$one-px`은 위에서 살펴보았던 <b>전역 변수</b>로, `1px`을 `$mobile-viewport-width`로 나눈 뒤 100을 곱한 값인, <u>단위가 존재하지 않는 순수 숫자값</u>이다.
+
+하지만 인수로 전달받은 `$value`에는 `px` 단위가 붙어있기 때문에, 표현식 `$value * $one-px * 2`은 <u><b>단위가 포함</b>된 `number` 타입의 값이 된다.</u> <b>모바일 뷰</b>에서는 `px` 대신 `vw`를 사용해야 하므로, 위에서 다뤘던 `remove-unit` 함수를 사용하여 <b>단위를 제거</b>한 뒤, `+` 연산자를 사용해 문자열 `vw`를 뒤에 붙인 값을 반환한다.
+
+<Callout variant="info">
+  <b>📝 Sass의 `string` 타입</b>
+  <br />
+  <br />
+  Sass에서 `string` 타입의 값은 2가지 형태로 표현할 수 있다.
+
+  - 1️⃣ 따옴표가 있는 경우 (quoted string): `"Helvetica Neue"`
+  - 2️⃣ 따옴표가 없는 경우 (unquoted string): `bold`, `solid`
+  <br />
+  `calc-viewport-width` 함수는 내부에서 🅰️`"px"`, 🅱️`vw`란 표현식을 사용하는 데, 따옴표 유무만 다를 뿐 전부 `string` 타입이다.
+  <br />
+  <b>참고로</b>, unquoted string 중 아래 <b>4가지</b>는 `string`으로 <u>취급되지 않는다!</u>
+
+  - 1️⃣ 색상을 의미하는 문자열 ([color](https://sass-lang.com/documentation/values/colors/) 타입으로 취급됨)
+  - 2️⃣ null
+  - 3️⃣ true, false
+  - 4️⃣ not, and, or
+</Callout>
+
+<Callout variant="warning">
+  <b>🚨 vw를 quoted string 형태로 더하면 안되는 이유</b>
+  ```scss
+  @return remove-unit($value * $one-px * 2) + vw
+  ```
+  `calc-viewport-width` 함수는 `number` 타입인 `remove-unit` 함수의 반환값에 unquoted string 형태의 문자열 `vw`를 더함으로써, 최종적으로 `string` 타입의 값을 반환한다.
+
+  ```scss
+  @return remove-unit($value * $one-px * 2) + "vw"
+  ```
+
+  하지만, `vw`나 `"vw"` 둘 다 Sass에서 지원하는 문자열 표기형식이다. 그렇다면 위와 같이 작성해도 정상적으로 동직하지 않을까?
+
+  ```scss
+  @include scale(border, 100px solid black);
+  ```
+  위와 같이 `scale` mixin을 사용했다고 하자. 예상과는 달리, 아래처럼 vw로 변환된 값에 따옴표가 붙게 되어, `number`가 아닌 `string` 타입의 값을 CSS 속성으로 사용하는 것을 확인할 수 있다...
+  <br />
+
+  ![](https://i.imgur.com/ls7idNO.png)
+  이렇게 동작하는 이유는 [Sass만의 문자열 연산 특징](https://sass-lang.com/documentation/operators/string/) 때문이다.
+  <br />
+  ![](https://i.imgur.com/TbZW6hX.png)
+
+  ```scss
+  400 + vw   // 400vw
+  400 + "vw" // "400vw"
+  ```
+
+  <b>즉</b>, `number` 타입의 값이 `string` 타입의 값으로 잘못 사용되는 것을 방지하기 위해, unquoted string 형태의 `vw`를 사용하는 것이다.
+</Callout>
+
+### 5️⃣ is-digit
+
+```scss
+@function is-digit($char) {
+  @if type-of($char) == 'string' {
+    @return map.get($digit-chars-map, $char) != null;
+  } @else {
+    @return false;
+  }
+}
+```
+
+
+`is-digit` 함수는 인수로 전달받은 단일 문자열 `$char`가 숫자형 문자라면 `true`를, 아니라면 `false`를 반환한다.
+
+함수 내부에서 사용된 빌트인 함수 `map.get($map, $key)`는 첫번째 인수로 전달받은 map 요소들 중에서 두번째 인수로 전달받은 key와 일치하는 키가 존재한다면 해당 요소의 값을, 존재하지 않는다면 `null`을 반환한다.
+
+### 6️⃣ tokenization
+
+```scss
+@function tokenization($str) {
+  @if type-of($str) == 'string' {
+    $tokens: ();
+    $cursor: 0;
+
+    @if string.index($str, '(') == null or string.index($str, ')') == null {
+      @return $tokens;
+    }
+    @if string.index($str, 'rem') != null or string.index($str, 'em') != null {
+      @error "Expected 'px', but got something else.";
+    }
+
+    @for $i from 1 through string.length($str) {
+      $curr: string.slice($str, $i, $i);
+      $next: string.slice($str, $i + 1, $i + 1);
+
+      @if $curr == 'p' and $next == 'x' {
+        $chars: '';
+        $is-paused: false;
+
+        @for $j from $i - 1 through 0 {
+          @if $is-paused {
+            // sass doesn't support break statement
+          } @else {
+            $curr: string.slice($str, $j, $j);
+
+            @if is-digit($curr) or $curr == '.' or $curr == '-' {
+              $chars: $curr + $chars;
+            } @else {
+              $is-paused: true;
+            }
+          }
+        }
+
+        $tokens: list.append(
+          $tokens,
+          ($chars + 'px', $i - string.length($chars))
+        );
+      }
+    }
+
+    @return $tokens;
+  } @else {
+    @error "The argument must be a string.";
+  }
+}
+```
+
+`tokenization` 함수는 <u>`translate()`, `filter()`와 같이 CSS 값으로 <b>함수</b>가 사용된 경우를 대응</u>하기 위해 사용되는 함수이다. 따라서 인수로 전달받은 `$str`이 CSS 함수이며, `px` 단위를 사용하는 경우에만 로직을 수행한다.
+
+<Callout variant="info">
+  <b>📝 Sass의 for 문 사용방법</b>
+  <br />
+  <br />
+  Sass에서는 `to`, `through` 두가지 키워드를 통해 순회를 몇 회 할 것인지를 결정할 수 있다.
+
+  1. `to N`:  `N - 1` 까지 반복 (`i < N`)
+  2. `through N`: `N`까지 반복 (`i <= N`)
+
+  Sass의 반복문은 JS처럼 <u>반복문 변수를 증가시킬 지 감소시킬 지를 명시적으로 정할 수 없다!</u> 대신 반복문 변수 초기값이 `to` 혹은 `through` 키워드 뒤에 오는 값보다 크고 작은지의 여부에 따라 증감이 자동으로 결정된다.
+
+  ```scss
+  @for $i from 1 to 5 {
+    // (증가) 1, 2, 3, 4, 5
+  }
+
+  @for $i from 1 through 5 {
+    // (증가) 1, 2, 3, 4
+  }
+
+  @for $i from 5 to 1 {
+    // (감소) 5, 4, 3, 2
+  }
+
+  @for $i from 5 through 1 {
+    // (감소) 5, 4, 3, 2, 1
+  }
+  ```
+
+</Callout>
+
+이러한 동작방식을 인지한 상태에서, `tokenization` 함수의 for 문을 살펴보자.
+
+```scss
+@for $i from 1 through string.length($str) {
+  $curr: string.slice($str, $i, $i);
+  $next: string.slice($str, $i + 1, $i + 1);
+
+  @if $curr == "p" and $next == "x" {
+    $chars: "";
+    $is-paused: false;
+
+    @for $j from $i - 1 through 0 {
+      @if $is-paused {
+        // sass doesn't support break statement
+      } @else {
+        $curr: string.slice($str, $j, $j);
+
+        @if is-digit($curr) or $curr == "." or $curr == "-" {
+          $chars: $curr + $chars;
+        } @else {
+          $is-paused: true;
+        }
+      }
+    }
+
+    $tokens: list.append($tokens, (
+      $chars + "px",
+      $i - string.length($chars),
+    ));
+  }
+}
+```
+
+인수로 전달받은 문자열 `$str`을 순회하며, 현재 인덱스에 해당하는 문자를 `$curr`, 다음 인덱스에 해당하는 문자를 `$next`에 저장한다.
+만약 `$curr === "p"`이고 `$next === "x"`라면, 이는 `px` 단위를 사용하는 숫자형 문자열임을 의미한다.
+그렇다면 현재 인덱스인 $i를 기준으로, `px` 단위를 제외한 숫자형 문자열을 추출해야 한다.
+
+```scss
+tokenization(translateX(50px);
+```
+
+위와 같이 `tokenization`의 인수로 전달받은 값이 `translateX(50px)`라고 해보자. 조건식 `@if $curr == "p" and $next == "x"`이 true로 평가되는 순간은 `$i`가 13일 때이다.
+
+그렇다면 아래와 같이 `$i - 1`를 초기값으로 하는 `$j`를 통해 `$str`을 역순으로 순회하며, px 단위에 어떤 숫자값이 사용되었는 지를 찾아낸다.
+
+```bash
+1) $j: 12    $curr: "0"    $chars: "0"
+2) $j: 11    $curr: "5"    $chars: "50"
+3) $j: 10    $curr: "("    $chars: "50" (전부 찾았음)
+```
+
+`$j`가 10이 되었을 때 `$curr`의 값은 숫자가 아니며, 이는 `$str`의 `$i`번째 인덱스에 위치한 `px`앞에 사용된 숫자값을 전부 찾았음을 의미한다.
+이 경우 더 이상 반복문을 수행할 필요는 없지만, Sass는 break 문을 지원하지 않아 반복문을 탈출할 수 없다!
+따라서 `$is-paused` 변수를 추가로 선언해 해당 값이 true라면 반복문 로직을 수행하지 않도록 한다.
+
+`$chars`에는 "50"이 저장되어 있고, `$i - string.length($chars)`는 13 - 2 = 11이므로, 결과적으로 `("50px", 11)`이 반환된다.
+
+<Callout variant="info">
+  <b>🤔 값(`"50px"`) 뿐만 아니라 인덱스(`11`)도 리스트에 저장하는 이유는?</b>
+  <br />
+  <br />
+  scale mixin을 구조를 설명할 때 다시 다루겠지만, CSS 함수에 전달된 px 형태의 인수를 vw 형태로 치환하려면, px 형태의 값이 문자열 어디에 위치하는 지를 알아야 하기 때문이다.
+
+  ```scss
+  $expression: "translateX(40px)";
+  $from: 40px;
+  $to: 11.1111111111vw;
+
+  $start-index: string.index($expression, $from); // 11
+  $result = '';
+  $cursor = 1;
+
+  $part: string.slice($expression, $cursor, $start-index - 1) + $to;
+  $result = $result + $part;
+  // $result: translateX(11.1111111111vw
+
+  $cursor = $start-index + string.length($from); // 15
+  $result = $result + string.slice($expression, $cursor, string.length($expression));
+  // $result: translateX(11.1111111111vw)
+  ```
+</Callout>
+
+## scale mixin
+
+```scss
+@mixin scale($property, $values) {
+  $attributes: ();
+  $mobile-attributes: ();
+
+  @each $value in $values {
+    @if type-of($value) == 'string' {
+      // 함수인 경우
+      $tokens: tokenization($value);
+      $cursor: 1;
+      $result: '';
+      $expression: $value;
+
+      @each $token in $tokens {
+        $raw: list.nth($token, 1);
+        $start-index: list.nth($token, 2);
+        $viewport-width: calc-viewport-width(to-number($raw));
+
+        $part: string.slice($expression, $cursor, $start-index - 1) +
+          $viewport-width;
+        $cursor: $start-index + string.length($raw);
+        $result: $result + $part;
+      }
+
+      $result: $result +
+        string.slice($expression, $cursor, string.length($expression));
+
+      $attributes: list.append($attributes, $value);
+      $mobile-attributes: list.append(
+        $mobile-attributes,
+        string.unquote($result)
+      );
+    } @else if type-of($value) == 'number' {
+      // 단위를 사용하는 숫자인 경우
+      $viewport-width: calc-viewport-width($value);
+      $attributes: list.append($attributes, $value);
+      $mobile-attributes: list.append($mobile-attributes, $viewport-width);
+    } @else {
+      // 단위를 사용하지 않는 값인 경우  (ex. black, rgba(0, 0, 0, 0.12) 등)
+      $attributes: list.append($attributes, $value);
+      $mobile-attributes: list.append($mobile-attributes, $value);
+    }
+  }
+
+  @if length($attributes) > 0 {
+    #{$property}: $attributes;
+  }
+
+  @if length($mobile-attributes) > 0 {
+    @media (max-width: $mobile-contents-width) {
+      #{$property}: $mobile-attributes;
+    }
+  }
+}
+```
+
+`scale` mixin은 전체 코드 중 가장 복잡한 로직을 처리한다. `translate()`, `filter()`와 같은 CSS 함수를 포함한 모든 값을 처리할 수 있도록 작성되었다.
+
+로직 최상단에는 CSS 속성을 담을 빈 list 2개를 선언하며, 각각 PC, 모바일 뷰포트에 대응하는 속성을 담을 것이다.
+
+이후에는 `@each` 문을 사용하여 인수로 전달받은 list 타입의 `$values`를 순회하며, `$values`의 각 요소인 `$value`의 타입이 무엇인지에 따라 별도의 처리를 한다.
+
+#### $value가 `string` 타입인 경우
+
+다음과 같이 2가지 경우를 예상할 수 있다.
+
+```scss
+// 1️⃣ 함수 ❌
+@include scale(border, 1px solid black); // 1px: number, solid: string, black: color
+@include scale(display, none);
+
+// 2️⃣ 함수 ⭕️
+@include scale(transform, translateX(50px));
+```
+
+##### 1️⃣ 함수 ❌
+
+`$value`가 <b>함수</b>의 형태가 아니므로, `tokenization($value)`의 반환값은 항상 <b>빈 리스트</b>이다. 따라서 별도의 문자열 치환 로직을 수행하지 않고, `$value`를 그대로 사용한다.
+
+##### 2️⃣ 함수 ⭕️
+
+`$value`가 함수의 형태이므로, `tokenization($value)`의 반환값인 리스트가 비는 경우는 없다. 리스트의 각 요소는 (1️⃣숫자형 문자열, 2️⃣해당 문자열 시작 인덱스) 형태이다.
+
+`$value`를 순회하며, `tokenization` 함수를 통해 반환된 리스트의 각 요소를 순회하며, `calc-viewport-width` 함수를 통해 `px` 단위를 `vw` 단위로 변환한다.
+
+```scss
+$value: "translateX(50px)";
+
+$tokens: tokenization($value); // (("50px", 11))
+$cursor: 1;
+$result: '';
+$expression: $value;
+
+$raw: list.nth($token, 1);         // "50px"
+$start-index: list.nth($token, 2); // 11
+
+$viewport-width: calc-viewport-width(to-number($raw)); // 11.1111111111vw
+
+$part: string.slice($expression, $cursor, $start-index - 1) + $viewport-width;
+$result: $result + $part;
+// $part: translateX(11.1111111111vw
+
+$cursor: $start-index + string.length($raw); // 15
+$result: $result + string.slice($expression, $cursor, string.length($expression));
+// $result: translateX(11.1111111111vw)
+```
+
+위와 같이 `$result` 값을 구한 뒤, `list.append` 함수를 통해 PC, 모바일 뷰포트에 대응하는 속성을 담는 list에 각각 추가한다.
+
+```scss
+$attributes: list.append($attributes, $value);
+$mobile-attributes: list.append(
+  $mobile-attributes,
+  string.unquote($result)
+);
+```
+
+
+<Callout variant="info">
+  <b>🤔 string.unquote 함수로 따옴표를 제거하는 이유는?</b>
+  ```scss
+  $mobile-attributes: list.append(
+    $mobile-attributes,
+    $result
+  );
+  ```
+  `$mobile-attributes` 에 값을 추가할 때 `string.unquote` 함수를 쓰지 않으면 어떻게 될까?
+  <br />
+
+  ![](https://i.imgur.com/4sxoN7K.png)
+  그렇다면 위와 같이 문자열 값이 전부 quoted string 형태로 저장되는데, 이는 올바른 CSS 문법이 아니다. 따라서 `string.unquote` 함수를 사용하여 따옴표를 제거한 뒤에 리스트에 값을 추가해야 한다.
+</Callout>
+
+#### $value가 `number` 타입인 경우
+
+이 경우는 `$value`가 단위를 포함한 숫자인 경우이다. 이때는 `calc-viewport-width` 함수를 통해 `px` 단위를 `vw` 단위로 변환한다.
+
+#### $value가 `string`도 `number` 타입도 아닌 경우
+
+이 경우는 `$value`가 `black`, `rgba(0, 0, 0, 0.12)`와 같이 <u>단위를 사용하지 않는 값</u>인 경우로, 대부분 `color` 타입의 값일 것이다. 이 경우는 `$value`를 그대로 사용한다.
+
+## ✅ 최종 결과
+
+<div align={'center'}>
+  <img src={ImageSrc} alt="최종 결과" />
+</div>
+
+내 블로그에 적용한 <b>결과</b>는 위와 같다.
+<u>CSS 함수를 값으로 전달받는 경우를 처리</u>하는 복잡한 로직을 추가로 수행해야 하다 보니, UI 변경이 빠르게 이루어지지 않는다는 점은 조금 아쉽다.
+
+하지만 불편함이 느껴지는 수준은 아니고 <u>"약간 아쉽다"</u> 정도이고, 그 대신 CSS 함수를 `scale` mixin에 사용할 수 있다는 <b>편리함</b>을 얻었으니, <b>trade off</b>로 충분히 받아들일 만하다.
+
+이처럼 개선된 scale 로직을 내 블로그에 적용시켜보고 동작 방식도 자세히 살펴보았는데, 덕분에 Sass 이해도가 몇 배는 더 높아져서 매우 기쁘다 😄
+
+추가로, [여기 Sass Playground 링크](https://sass-lang.com/playground/#eJy9WN1u3EQUvs9TDMWSbWJv12nTtLsKioR4gvIC3vXs7jT+wzNONlQrIdQLRLmDSFFFL5GKxEVBXMILNdt34Myvx38pXIDUpMczZ875zu+cSRSd1RQjl8aUzrK4dOcH1kJKKGuvZDHbtFcoq0i+hrUDJysWJMXhssgZzhkNL0nCNjN0cjQtt3y/yHFYbmeIC5kk5MKLym2Aho/56BMUTaf8WELWhIXLTVzRECDOkHeAkDt1Z2gacCoCKhLUEVBHgnoA1ANBPQTqoaCOgToW1COgHgnqBKgTQT0G6rGgngD1JDjwQffZqs6XjBQ5YkWY4nzNNp5zEac1Btx1TpiPnsORM7KSn+ijU+SWW1eswjquqqJC9z7flnjJcCL2ArSoGVoXDH38XBzaTe7NgX13wCVVmNVVjqQS7gPuul0HSV5nC1wpJA0EdlXisFiZ9VMAI1kNoJZ4oRVAphDMgePcFhXdMXtiJBlaNonjtlFOhWmdMogXX5LxpPorI3kNH1LOhKZkiY2LI/gnzQh5ggGAFah3CFpVRQaQPXk6gKBzRrapinq90bJa8fKVCQ7PoxF1DuE/vtAkPZoXzONFMCF5grceZN/kHF9Rr5uTfiAF+4jj45RAPXG12sb1TSKpDWQbEipfBdppfmDYRjD7isGfC2LXoLeBGBzG/ZHibxJAbfET04ZfB08Roi7RIeK+WGPWc4X2RFt6T7vWxaXNx1QdNq3iQ+oCLdG4oVNRdzq5U2IVzooLHPLibBeZkmVQ6Sh4pl65ayK/K3AZp8vwguDLsqiYbHD/qnrjPJFKW5B4gZrSBAl9jtNWO2oM6BsI0FV/BurIBysuLodD+MGm1oOheoEKSkvcQENqe47QUMTVU/XV85ZcPu33KhOruxOHezGv03Q+im0Vw9oANFac45x8FfMPzwHtA+jEah+cI85CGXgqXZ1lXdGiEk3RxFMVvOw9XFSAXM8V8jhi3muGWHyLRQft/n3Ed/ev/0CsinOaxgx7UDQrkjK4SXx0+8Nv+9c36LOnT9H76zf7b2/evf0a7a9f3L78Hr37/a/9q7edFFImNIEdxwzZ5ho/j6Fu8QzALrf8t0IEEgOEM3T78s3+pxe3P/+J9t/8un/1y/vrm9vvfuwAvjtfaZFhtgE4iIe+yVRpkX3fRGMXjAm9jmTvghEmmutFMeZ4y0YYeRPR/+v7SPd0EC/rWrYFIUYsWHWu7jlIMNedN2tQTGUMo1sy00lt9qSlz6SloDi0zJ1achUKI6m1JQLGp0KUFJjmLni3LnnLQ4sKx+dgK6RdBkOedabbXj7oxWf8x7ega1BWq4DD6irW3oIbsPUduh2Njcsk06H6nre4htG2Xcsq2cmsUwdD9K4xwfQDMWzEZYnzxLMOqf3AWpKdjwJOmc8iZp3EFBy+b06Z3Nu1krxf0Z1GqCroiw1GcbWueQRRVlMIKzYjoJ73eIvMyJbkiMKtB1Erq6LEFbsKVJOnslacmME5qEJs2qB+CXR3eFPF8XKjp2Ki7wtqXX5D12e76VpubrdueWJuFbBoxVFvLmmKycHbElYpnJ+Zy8s0HIFV6BBYpVa7OKv4UsU653ESDIEodcMCtQKjgmiRA6xHNmt7sJgNThvWqwGU+3b9OCVo6tZaY1+gPRK0QPEOAWOCnaRtlRZA7dHW+cNutnJc1qH+MCiANik8OjWOTMyDJnUwNDyWi1qpaleotaGzu0mjgWQerO4+Y2/kr/Mv6wIubD2udib+8Sdc/wX4D9Ola8x/4YEBw7vgxl4R/x8cS0TzpABP64RpuH30qbkp4RWs295uZsOdD8noKbZFnWU4ITGCB9BWB2zsLybaPR3tPfG2OQBmsiiSKzW65su0TrBq3YuiSjDUSASPAlqkJEGLNF6eC3d0WMVQCSMEjGXNfHk85X/f4b/Fg+hvCTN/8w==)에서 scale 코드를 테스트할 수 있도록 했으니, 혹시 관심이 있다면 들어가서 이것저것 건드려보길 바란다.
+
+
+## 🔗 레퍼런스
+- [쪼그라드는 웹페이지 - 데브시스터즈](https://tech.devsisters.com/posts/shrinking-webpage/)
+- [Sass 공식 문서](https://sass-lang.com/documentation/)

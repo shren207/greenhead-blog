@@ -1,0 +1,272 @@
+---
+title: "[K8S] 프론트엔드 개발자의 EKS 경험기 3️⃣"
+date: 2024-04-27 12:04:75
+category: kubernetes
+thumbnail: "k8s"
+description: '클러스터를 생성하고, 디플로이먼트와 서비스를 정의한 매니페스트 파일을 작성해보자.'
+draft: false
+---
+
+
+import Layout from '/src/templates/blog-post';
+export default Layout;
+
+![](https://i.imgur.com/WGnU0ZA.png)
+
+[지난 포스트](/blog/kubernetes/2024-03-04/)에서는 Github Actions를 사용해서, 커밋을 원격 레포지토리에 푸시하면 빌드된 이미지를 AWS ECR에 자동으로 업로드되도록 해 보았다.
+
+이번에는 실제로 AWS EKS를 사용해서 클러스터를 생성해보자.
+
+<Callout variant="warning">
+  <b>🚨 경고, 전문성이 높지 않은 글입니다!</b>
+  <br />
+  <br />
+  실제 devOps 개발자 분들 혹은 클라우드 서비스에 일가견이 있으신 분들은 제 글을 보고 의문을 품는 부분이 한두 곳이 아니실 수 있습니다.
+  - <u>"왜 externalDNS를 사용하지?"</u>
+  - <u>"사이드카 인젝션도 모르는데 istio는 왜 사용하는 거지?"</u>
+  - <u>"vpc가 뭔지는 알고 글을 쓰는건가 이사람?"</u>
+
+  여러분들의 의견이 전부 맞습니다. 저는 <b>프론트엔드 개발자</b>이며, 단순히 회사의 k8s 인프라가 어떤 방식으로 동작하는 지 너무나도 궁금하여, 회사에서 구축한 방식을 기준으로 설명을 하는 것입니다.
+  <br />
+  제 수준에서 설명을 할 수 있는 부분(왜 spot 인스턴스를 사용했는가?)은 설명하겠지만, 너무 deep해지는 부분들(ex. istio는 무엇이며, 왜 사용하는가?)은 제 수준을 벗어나는 주제가 되어서 부득이 생략하도록 하겠습니다. 🙇
+</Callout>
+
+
+## EKS 클러스터 생성하기
+
+AWS EKS 대시보드에서 직접 cluster를 생성할 수도 있겠지만, AWS 공식 EKS CLI인 [eksctl](https://eksctl.io/)을 사용하면 터미널에서 손쉽게 클러스터를 생성할 수 있다.
+
+맥의 경우 `homebrew`를 사용하면 `eksctl`을 간단히 설치할 수 있다.
+
+아래와 같이 `yaml` 포맷의 ClusterConfig을 작성하며, 기본적인 구조는 [AWS 공식 문서](https://catalog.us-east-1.prod.workshops.aws/workshops/9c0aa9ab-90a9-44a6-abe1-8dff360ae428/ko-KR/50-eks-cluster/100-launch-cluster#eksctl-eks)를 참조하여 작성하였고, 일부 속성만 추가 및 수정하였다.
+
+```yaml
+# cluster-config.yaml
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: greenhead-cluster
+  region: ap-northeast-2 # 서울 리전
+  version: "1.28"
+
+vpc:
+  cidr: "10.0.0.0/16" # 클러스터에서 사용할 VPC의 CIDR
+  nat:
+    gateway: HighlyAvailable
+
+managedNodeGroups:
+  - name: node-group # 클러스터의 노드 그룹명 (이름 변경!)
+    instanceType: t3.medium # 클러스터 워커 노드의 인스턴스 타입
+    desiredCapacity: 3 # 클러스터 워커 노드의 갯수
+    privateNetworking: true
+    iam:
+      withAddonPolicies:
+        imageBuilder: true # Amazon ECR에 대한 권한 추가
+        albIngress: true  # albIngress에 대한 권한 추가
+        autoScaler: true # auto scaling에 대한 권한 추가
+        externalDNS: true # externalDNS에 대한 권한 추가
+	  spot: true # ✅ Spot Instance로 노드 그룹 생성 (기본값은 On-Demand)
+
+iam:
+  withOIDC: true
+```
+
+<Callout variant="info">
+  위와 같이 `apiVersion`, `kind` 필드를 포함한 `yaml` 파일을 <b>매니페스트<sup>Manifest</sup> 파일</b>이라고 부른다.
+  <b>매니페스트 파일</b>은 <u>k8s 리소스를 어떻게 생성/관리할 지를 정의</u>하는 파일로, `kubectl` 혹은 `eksctl` 등의 CLI 툴을 사용하여 이를 클러스터에 적용할 수 있다.
+</Callout>
+
+기본적인 구조는 앞서 설명했듯이 [AWS 공식 문서](https://catalog.us-east-1.prod.workshops.aws/workshops/9c0aa9ab-90a9-44a6-abe1-8dff360ae428/ko-KR/50-eks-cluster/100-launch-cluster#eksctl-eks)의 예제를 참조하였으나, 일부 수정된 부분이 있다. 그 부분을 간단히 설명해보겠다.
+
+---
+#### 1️⃣ "AWS eksctl 공식 문서에서는 버젼이 1.27이던데, 왜 1.28로 하였나?"
+
+![](https://i.imgur.com/kn9qKmr.png)
+
+AWS EKS에서 지원하는 k8s의 각 버젼별 지원정보를 제공하는 [AWS EKS Kubernetes release calendar](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#kubernetes-release-calendar)를 보면, k8s 1.27버젼의 공식 지원 종료일은 2024년 7월 24일로, 현재 얼마 남지 않은 상태이다.
+
+<b>표준 지원 종료일(End of standard support)</b>이 지났더라도 <b>연장 지원 종료일(End of extended support)</b>이 지나지 않은 k8s 버젼은 계속해서 사용할 수는 있다.
+
+![](https://i.imgur.com/mhavqEr.png)
+
+But, 표준 지원의 대상이 되는 k8s를 사용할 경우 EKS 클러스터 시간당 사용 비용은 `0.1$`이지만, <u>연장 지원의 대상이 되는 k8s를 사용</u>하는 경우는 시간당 비용이 `0.6$`로 무려 <b>6배</b>나 높아진다!
+클러스터를 한달 사용한다고 했을 때, 24시간 * 30일 = 720시간을 사용한다고 치면, `0.1$`로 계산한다면 `72$`이지만, `0.6$`로 계산한다면 `432$`이다.
+
+사실, <u>단순 실습이 목적</u>이므로 1.27 버젼의 표준 지원 종료일인 7월 24일까지는 충분히 여유가 있다. <b>하지만</b> <u>마지막으로 실습하였을 때 1.28 버젼을 사용</u>했기에 버전을 바뀜으로써 생길 수 있는 변수를 원치 않는데다, 굳이 더 낮은 버전을 고집할 그럴듯한 이유도 없으므로, 이번에도 1.28 버전을 사용하였다.
+
+---
+#### 2️⃣ "CloudWatch 관련 필드를 제거한 이유는?"
+
+AWS에서 제공하는 서비스인 CloudWatch는 실시간 데이터 모니터링 및 관리 기능을 제공하는데, 로깅 서비스 치고는 상당히 높은 비용을 요구한다.
+
+![](https://i.imgur.com/UrPwWOG.png)
+> 금년 2월에 청구된 AWS 비용 중, CloudWatch는 28$ 정도 청구되었다.
+
+나의 경우는 간단한 실습이 목적이므로, CloudWatch는 사용하지 않는다.
+
+---
+#### 3️⃣ "managedNodeGroups.spot 필드의 값을 true로 설정한 이유는?"
+
+해당 필드의 값을 `true`로 설정하면 노드 그룹은 On-Demand가 아닌 Spot 인스턴스를 생성하게 된다. 이렇게 변경한 이유는, <u>대부분의 경우 Spot 인스턴스가 저렴</u>하기 때문이다.
+
+좀 더 자세히 설명해 보겠다. `managedNodeGroups` 필드는 클러스터의 노드 그룹을 정의 및 생성할 때 사용되는 필드이다. 노드 그룹은 노드 인스턴스를 생성하는 데, 각 노드는 <b>AWS EC2 인스턴스</b>로 생성된다.
+
+AWS EC2 인스턴스는 예약 인스턴스를 제외하면 크게 <b>온디맨드 인스턴스</b>, <b>스팟 인스턴스</b> 2가지로 나뉜다.
+
+- <b>온디맨드 인스턴스</b>
+  - 정의: 사용자가 필요한 만큼의 인스턴스를 즉시 시작하고 종료할 수 있는 인스턴스로, 고정된 요금을 지불하면서 사용하는 인스턴스이다.
+  - 장점: 사용자가 필요한 만큼의 인스턴스를 즉시 사용할 수 있으며, 가격이 변하지 않는다.
+  - 단점: 인스턴스 유형 중 가격이 가장 비싸다.
+- <b>스팟 인스턴스</b>
+  - 정의: AWS의 미사용 자원을 활용하여 저렴한 가격에 인스턴스를 사용할 수 있는 인스턴스로, 온디맨드 인스턴스에 비해 70% 이상 저렴하다.
+  - 장점: 최대 90%까지 저렴한 가격으로 인스턴스를 사용할 수 있다.
+  - 단점: 인스턴스의 가격이 변동적이며, 언제든지 인스턴스가 중단될 수 있으므로 실서비스에 사용할 때는 주의가 필요하다.
+
+![](https://i.imgur.com/xiMaI4T.png)
+
+나의 경우 `m3.medium` 스팟 인스턴스를 사용할 것이다. 글 작성 기준으로 On-Demand에 비해 60% 정도 저렴하며, 중단 빈도도 5% 미만이므로 실습용으로 사용하기에 적합하다.
+
+<Callout variant="info">
+  아래 링크에서 Spot 인스턴스와 On-Demand 인스턴스의 요금을 비교해보고, 실제 Spot 인스턴스의 요금 절감률과 중단률을 확인할 수 있다.
+  <br />
+
+  - [AWS Spot 인스턴스 요금 확인](https://aws.amazon.com/ko/ec2/spot/pricing/)
+  - [AWS On-Demand 인스턴스 요금 확인](https://aws.amazon.com/ko/ec2/pricing/on-demand/)
+  - [Spot 인스턴스의 요금 절감률, 중단률 확인](https://aws.amazon.com/ko/ec2/spot/instance-advisor/)
+</Callout>
+
+---
+이제, 다음 `eksctl` 명령어를 사용하여 EKS 클러스터를 생성해보자.
+
+```bash
+eksctl create cluster --config-file=cluster-config.yaml
+```
+
+명령어가 실행되면 터미널에 클러스터 생성과 관련된 로그가 엄청나게 올라오는 것을 확인할 수 있다.
+
+
+```bash
+...
+...
+2024-04-27 11:36:24 [ℹ]  node "ip-10-0-161-211.ap-northeast-2.compute.internal" is ready
+2024-04-27 11:36:25 [ℹ]  kubectl command should work with "/Users/greenhead/.kube/config", try 'kubectl get nodes'
+2024-04-27 11:36:25 [✔]  EKS cluster "greenhead-cluster" in "ap-northeast-2" region is ready
+```
+
+약 <b>10 ~ 15분</b> 정도의 제법 긴 시간이 지나면, `EKS cluster "greenhead-cluster" in "ap-northeast-2" region is ready`라는 로그와 함께 <b>클러스터 생성이 완료</b>된다.
+
+![](https://i.imgur.com/QieZ77W.png)
+
+AWS EKS 대시보드에서도 클러스터가 생성된 것을 확인할 수 있다!
+
+<Callout variant="warning">
+  <b>🚨단순 실습용으로 EKS를 사용하면 큰코 다칩니다!</b>
+  <br />
+  <br />
+  솔직히, 단순 실습용으로 EKS를 다루기에는 <b>요금이 너무 비쌉니다!</b>  표준 지원 버젼 기준으로 클러스터만 1달 사용하는데만 비용이 약 `72$`입니다.
+  여기서 추가로 EC2, 로드밸런서 등의 요금까지 더해지면, 최대한 낮게 잡아도 `150$` 이상은 나오게 됩니다.
+  <br />
+
+  ![](https://i.imgur.com/GGuVz7T.png)
+  > 내게 청구된 AWS 2월 비용 80만원... (다행히도 지금은 환불되었음)
+
+  제 글을 보고 따라해보실 분은 솔직히 없으리라 생각하지만, 만약 k8s를 실습해보고 싶으신 비 devOps 개발자분은 EKS 보다는 docker-desktop의 k8s 기능 혹은 minikube 등을 사용할 것을 추천합니다.
+</Callout>
+
+## 리소스 정의 및 클러스터에 배포하기
+
+이제는 k8s 클러스터에 리소스를 정의하고, 해당 리소스를 클러스터에 배포해보자.
+
+```bash
+.kubernetes
+ ├── base
+ │   ├── deployment.yaml
+ │   └── service.yaml
+ └── overlays
+     ├── gateway.yaml
+     └── virtual-service.yaml
+```
+
+위와 같이 프로젝트 루트 경로에 `.kubernetes` 폴더를 생성하고 base, overlays로 나누어 매니페스트 파일을 작성할 것이다.
+
+<Callout variant="info">
+  <u>작성한 매니페스트 파일을 클러스터에 배포</u>하기 위해서는 [kubectl](https://kubernetes.io/docs/reference/kubectl/)이라는 CLI 도구를 사용해야 하므로 지금 미리 설치해 두도록 하자. 맥북을 사용한다면 `eksctl`과 마찬가지로 <b>Homebrew</b>를 통해 간단히 설치할 수 있다.
+</Callout>
+
+### base - 1️⃣ deployment.yaml
+
+<b>디플로이먼트<sup>Deployment</sup></b>를 설명하기 전에 먼저 <b>파드<sup>Pod</sup></b>에 대해 간단하게 이해할 필요가 있다.
+
+<b>파드</b>는 <u>k8s에서 <b>가장 작은</b> 배포 단위</u>이며, 하나 이상의 컨테이너로 구성된다. 파드를 직접 배포해도 컨테이너를 관리할 수 있지만, 만약 문제가 생겨 <u>파드가 종료되면 해당 파드는 그대로 유실되며, <b>재생성되지 않는다!</b></u>
+
+파드는 직접 사용하기에는 불편한 점이 많은데, 이런 불편함을 해결하기 위해 <b>컨트롤러<sup>Controller</sup> 객체</b>를 사용한다. <b>컨트롤러 객체</b>는 <u>파드 등의 다른 리소스를 관리하는 k8s 리소스</u>를 뜻하며, 대표적으로 <b>디플로이먼트</b>가 있다.
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: green-blog-co # Deployment 이름
+spec:
+  selector:
+    matchLabels:
+      app: green-blog-co # Deployment가 Pod를 선택할 때 사용할 label
+  template:
+    metadata:
+      labels:
+        app: green-blog-co # Deployment가 생성할 Pod에 부여할 label
+    spec:
+      containers:
+        - name: green-blog-co
+          image: 971490215356.dkr.ecr.ap-northeast-2.amazonaws.com/green-blog-co # ECR에 업로드된 이미지 주소
+          ports:
+            - containerPort: 9000
+```
+
+위 매니페스트 파일에 정의된 Deployment는 다음과 같은 역할을 한다.
+
+- `spec.selector.matchLabels`
+  - <u>디플로이먼트가 관리할 파드의 <b>레이블</b></u>을 정의한다. 즉, 이 레이블을 가진 파드만 디플로이먼트가 관리하며, <u>해당 레이블을 갖지 않은 파드는 디플로이먼트가 <b>책임지지 않는다</b></u>.
+  - 여기선 `app: green-blog-co` 레이블을 가진 파드를 디플로이먼트가 관리한다. <u>해당 레이블을 가진 파드가 디플로이먼트가 유지해야 할 파드의 개수보다 <b>적어지거나 많아지는 경우</b>, 디플로이먼트는 <b>파드의 개수를 조정하여 일치</b></u>시킨다.
+  - 이때 디플로이먼트가 관리해야 할 파드의 개수를 명시하지 않았으므로, 디플로이먼트는 <u>파드의 개수를 <b>기본값</b>인 1개로 유지</u>하고자 한다.
+
+- `spec.template`: 디플로이먼트가 파드를 생성할 때 사용할 템플릿을 정의한다.
+  - `spec.template.metadata.labels`: 파드에 부여할 레이블을 정의한다. `spec.selector.matchLabels` 필드에 정의된 레이블과 일치해야 하므로, `app: green-blog-co`로 작성한다.
+  - `spec.template.spec.containers`: 파드에 포함될 컨테이너를 정의한다. 여기서는 `green-blog-co`라는 이름의 컨테이너를 생성하며, 컨테이너를 생성할 때 사용할 이미지는 ECR에 업로드된 것을 사용한다. 마지막으로, 컨테이너가 사용할 포트는 9000번 포트로 설정한다.
+
+
+### base - 2️⃣ service.yaml
+
+파드에 접근하기 위해서는 기본적으로 <b>해당 파드의 IP 주소</b>를 알아야 한다. 하지만 앞서 설명했듯 파드는 k8s의 가장 작은 배포 단위로, 노드에서 에러 발생 혹은 디플로이먼트 리스타트 등으로 기존 파드가 새로운 파드로 대체되는 경우가 제법 흔하다.
+
+이때 파드는 <u>생성될 때마다 IP 주소가 변경</u>되므로, <i>"특정 파드에 접근하기 위해 해당 파드의 IP 주소를 직접 사용하는 것"</i>은 <b>좋은 방식이 아니다</b>. 그리고 실제로 그 누구도 이런 방식을 사용하지 않을 것이다.
+
+<u>언제든지 다른 것으로 바뀔 수 있는 리소스<sup>Pod</sup></u>에 접근하기 위해 <b>서비스<sup>Service</sup></b>라는 k8s 리소스를 사용한다.
+서비스는 자신만의 IP 주소를 가지며, 해당 IP 주소로 요청을 보내면 서비스가 관리하는 파드의 실제 IP 주소로 요청이 연결된다.
+
+또한, k8s 클러스터에는 <b>전용 DNS 서버</b>가 있다. 이 DNS 서버는 서비스 이름을 IP 주소로 변환해주는 역할을 한다. 최종적으로, 서비스 이름을 통해 파드에 접근할 수 있다.
+
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: green-blog-co-service
+spec:
+  ports:
+    - port: 3000
+      targetPort: 9000
+  selector:
+    app: green-blog-co
+```
+
+위 매니페스트 파일에 정의된 Service는 다음과 같은 역할을 한다.
+
+서비스 이름 `green-blog-co-service`의 3000번 포트로 요청이 들어오면, 해당 요청을 `app: green-blog-co` 레이블을 가진 파드의 9000번 포트로 전달한다.
+
+## 🤔 다음으로 할 것은?
+
+이번에는 `eksctl`을 사용하여 클러스터를 생성하고, k8s 리소스 중 가장 기본적인 Deploymnet와 Service를 정의하는 매니페스트 파일을 작성해 보았다.
+
+다음에는 `overlays` 폴더 내부에 위치한 `gateway.yaml`과 `virtual-service.yaml`에 대해 다뤄볼 건데, 이 두 파일은 <b>Istio</b>라는 도구를 다루기 위한 매니페스트 파일이다.
+해당 작업을 위해서는 매니페스트 파일을 정의하는 것 외에도 별도로 해주어야 하는 것이 많으므로, 내용이 길어질 수 있어 여기서부터는 다음 포스트에서 다루도록 하겠다.. 🙇

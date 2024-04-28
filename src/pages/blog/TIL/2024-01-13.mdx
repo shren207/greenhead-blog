@@ -10,7 +10,7 @@ draft: false
 import Layout from '/src/templates/blog-post';
 export default Layout;
 
-import videoSrc from '/content/assets/videos/2023-12-19_2.mp4'
+import videoSrc from '/content/assets/videos/2024-01-13.mp4'
 
 <u>앱 로딩 화면이 심심하다</u>는 의견이 있어서, 정적 이미지를 대신해서 **애니메이션**을 추가하기로 기획이 되었다.
 
@@ -115,9 +115,7 @@ $ patch-package react-native-fast-image
 ## ✅ 이젠 된다!
 
 
-<video width="50%" height="auto" controls>
-  <source src={videoSrc} type="video/mp4" />
-</video>
+<Video videoSrcURL={videoSrc}/>
 
 > `<FastImage>` + `Animated Webp` 조합의 로딩 애니메이션
 

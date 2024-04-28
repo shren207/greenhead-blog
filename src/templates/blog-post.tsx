@@ -6,6 +6,8 @@ import * as Elements from '../components/elements';
 import { Head } from '../components/head';
 import { Callout } from '../components/mdx/callout';
 import Defaults from '../components/mdx/defaults';
+import { Image } from '../components/mdx/image';
+import { Video } from '../components/mdx/video';
 import { PostDate } from '../components/post-date';
 import { PostNavigator } from '../components/post-navigator';
 import { PostTitle } from '../components/post-title';
@@ -16,7 +18,7 @@ import type { ReactNode } from 'react';
 import '../styles/code.scss';
 import 'katex/dist/katex.min.css';
 
-const shortcodes = { Link, Callout, ...Defaults };
+const shortcodes = { Link, Callout, Video, Image, ...Defaults };
 
 interface PageTemplateProps {
   pageContext: any;

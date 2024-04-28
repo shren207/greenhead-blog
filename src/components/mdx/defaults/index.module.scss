@@ -1,43 +1,50 @@
 .h2 {
-    border-bottom-style: solid;
-    border-bottom-color: hsla(0, 0%, 0%, 0.07);
-    @include scale(border-bottom-width, 1px);
+  border-bottom-style: solid;
+  border-bottom-color: hsla(0, 0%, 0%, 0.07);
+  @include scale(border-bottom-width, 1px);
 
-    @include on-mobile {
-        @include scale(font-size, 20px);
-        @include scale(margin-top, 40px);
-        @include scale(margin-bottom, 10px);
-    }
+  @include on-mobile {
+    @include scale(font-size, 20px);
+    @include scale(margin-top, 40px);
+    @include scale(margin-bottom, 10px);
+  }
 }
 
 .h3 {
-    @include on-mobile {
-        @include scale(font-size, 15.2px);
-        @include scale(margin-top, 20px);
-        @include scale(margin-bottom, 8px);
-    }
+  @include on-mobile {
+    @include scale(font-size, 15.2px);
+    @include scale(margin-top, 20px);
+    @include scale(margin-bottom, 8px);
+  }
 }
 
 .p {
-    @include on-mobile {
-        @include scale(font-size, 11.5px);
-    }
+  @include on-mobile {
+    @include scale(font-size, 11.5px);
+  }
 }
 
-.ul {
-    @include on-mobile {
-        @include scale(margin-left, 15px);
-    }
+.ul,
+.ol {
+  @include on-mobile {
+    @include scale(margin-left, 15px);
+  }
 }
 
 .li {
-    @include on-mobile {
-        @include scale(font-size, 12px);
-    }
+  @include on-mobile {
+    @include scale(font-size, 12px);
+  }
 }
 
 .b {
-    @include on-mobile {
-        @include scale(font-size, 12px);
-    }
+  @include on-mobile {
+    @include scale(font-size, 12px);
+  }
+}
+
+.img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }

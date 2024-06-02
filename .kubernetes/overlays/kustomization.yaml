@@ -2,8 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: green-blog-co
 images:
-- name: 971490215356.dkr.ecr.ap-northeast-2.amazonaws.com/green-blog-co
-  newTag: 285f130465b24f783dd63a444145d1d576f4f33a
+- name: 971490215356.dkr.ecr.ap-northeast-2.amazonaws.com/greenhead-blog
+  newTag: 8a8603be443a1575f94ce31b73e8aa0a5683bb1d
 resources:
 - gateway.yaml
 - virtual-service.yaml

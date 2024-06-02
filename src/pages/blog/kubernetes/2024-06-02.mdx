@@ -1,0 +1,478 @@
+---
+title: "[K8S] 프론트엔드 개발자의 EKS 경험기 4️⃣"
+date: 2024-06-02 13:06:12
+category: kubernetes
+thumbnail: 'k8s'
+description: '드디어 포스트를 마무리했다...'
+draft: false
+---
+
+import Layout from '/src/templates/blog-post';
+export default Layout;
+
+![](https://i.imgur.com/WGnU0ZA.png)
+
+[지난 포스트](/blog/kubernetes/2024-04-27/)에서는 클러스터를 생성하고, 가장 기본적인 리소스 유형인 `Deployment`와 `Service`를 정의한 매니페스트 파일을 작성해보았다.
+
+이번에는 `istio`와 관련된 리소스인 `Gateway`, `VirtualService`를 포함한 나머지 작업을 전부 마무리하여, 최종적으로 배포 자동화를 달성해보자.
+
+<Callout variant="warning">
+  <b>🚨 경고, 전문성이 높지 않은 글입니다!</b>
+  <br />
+  <br />
+  실제 devOps 개발자 분들 혹은 클라우드 서비스에 일가견이 있으신 분들은 제 글을 보고 의문을 품는 부분이 한두 곳이 아니실 수 있습니다.
+  - <u>"왜 externalDNS를 사용하지?"</u>
+  - <u>"사이드카 인젝션도 모르는데 istio는 왜 사용하는 거지?"</u>
+  - <u>"vpc가 뭔지는 알고 글을 쓰는건가 이사람?"</u>
+
+  여러분들의 의견이 전부 맞습니다. 저는 <b>프론트엔드 개발자</b>이며, 단순히 회사의 k8s 인프라가 어떤 방식으로 동작하는 지 너무나도 궁금하여, 회사에서 구축한 방식을 기준으로 설명을 하는 것입니다.
+  <br />
+  제 수준에서 설명을 할 수 있는 부분(왜 spot 인스턴스를 사용했는가?)은 설명하겠지만, 너무 deep해지는 부분들(ex. istio는 무엇이며, 왜 사용하는가?)은 제 수준을 벗어나는 주제가 되어서 부득이 생략하도록 하겠습니다. 🙇
+</Callout>
+
+## 트래픽 흐름 이해하기
+
+![](https://i.imgur.com/o6AXiQh.png)
+> 이미지 출처 : [aws-eks-istio-lab](https://github.com/junglekid/aws-eks-istio-lab)
+
+위 이미지는 EKS 클러스터 내에서 트래픽이 어떻게 흐르는 지를 보여준다.
+
+1. 유저가 도메인에 접근한다.
+2. AWS DNS 서비스인 Route53이 도메인을 로드밸런서인 ALB로 라우팅한다.
+3. ALB는 트래픽을 EKS 클러스터의 `istio-ingressgateway`로 전달한다.
+4. `istio-ingressgateway`는 트래픽을 `Gateway`로 전달한다.
+5. `Gateway`는 트래픽을 `VirtualService`로 전달한다.
+6. `VirtualService`는 트래픽을 `Service`로 전달한다.
+7. `Service`는 해당 트래픽을 `Pod`로 전달한다.
+8. `Pod`는 최종적으로 사용자에게 해당 페이지를 응답한다.
+
+위와 같은 흐름으로 트래픽이 처리되도록 하기 위해, 나는 <u><strong>다음 순서</strong>로 작업을 진행</u>할 것이다.
+
+1. ALB 설치
+2. Istio 설치
+3. ExternalDNS 배포
+4. Ingress 배포
+5. Gateway, VirtualService 배포
+
+## 1️⃣ ALB 설치
+
+ALB는 AWS에서 제공하는 로드밸런서 서비스로, 클러스터 외부에서 클러스터 내부로 트래픽을 전달하는 역할을 한다.
+
+설치하는 방법은 여러가지가 있겠지만, AWS에서 초심자는 [`helm`을 사용해서 설치](https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/lbc-helm.html)하는 것을 권장하므로, 이를 따라하기로 했다.
+
+<Callout variant="info">
+  <b>🤔 `helm`이란?</b>
+  ![](https://i.imgur.com/LfbiSE6.png)
+  <br />
+  <br />
+  Node.js에는 NPM이 있듯이, Kubernetes에는 [Helm](https://helm.sh/)이라는 **패키지 매니저**가 있다.
+  따라서 NPM의 `npm install` 명령어와 비슷하게 `helm install` 명령어로 클러스터에 필요한 의존성을 쉽게 설치할 수 있다.
+  <br />
+
+  macOS에서는 `brew install helm`으로 간단히 설치할 수 있다.
+</Callout>
+
+### 1. Service Account에 대한 IAM 역할 생성
+
+```bash
+curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.7.2/docs/install/iam_policy.json
+```
+
+위 명령어를 실행해서 IAM 정책 파일인 `iam_policy.json`을 현재 작업 디렉토리로 다운로드한다.
+
+```bash
+aws iam create-policy \
+    --policy-name AWSLoadBalancerControllerIAMPolicy \ # 1️⃣ 정책 이름
+    --policy-document file://iam_policy.json           # 2️⃣ 정책 파일
+```
+
+이후 위 `aws` 명령어를 실행하여 IAM 정책을 생성하자.
+
+![](https://i.imgur.com/oOLWLag.png)
+> 정상적으로 생성된 IAM 정책 `AWSLoadBalancerControllerIAMPolicy`
+
+IAM 정책을 생성했다면 이제 eksctl 명령어를 사용해서 IAM 역할을 생성한다.
+
+```yaml
+eksctl create iamserviceaccount \
+  --cluster=greenhead-cluster \ # 클러스터 이름
+  --namespace=kube-system \
+  --name=aws-load-balancer-controller \
+  --role-name AmazonEKSLoadBalancerControllerRole \
+  --attach-policy-arn=arn:aws:iam::971490215356:policy/AWSLoadBalancerControllerIAMPolicy \
+  --approve # 명령어 실행 후 별도 승인과정 없이 바로 서비스 계정 사용
+```
+> --attach-policy-arn에서 `971490215356`은 내 AWS 계정 ID를 의미한다.
+
+### 2. AWS Load Balancer Controller 설치
+
+```bash
+# 1️⃣ eks-charts 레포지토리를 로컬에 추가
+$ helm repo add eks https://aws.github.io/eks-charts
+# npm과 달리, helm에서는 리소스를 설치하려면 우선 설치하려는 레포지토리를 로컬에 등록해줘야 한다.
+
+# 2️⃣ 등록한 로컬 레포지토리 최신화
+$ helm repo update eks
+
+# 3️⃣ helm으로 ALB 설치
+$ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \ # 네임스페이스 명시
+  --set clusterName=greenhead-cluster \
+  --set serviceAccount.create=false \ # 전 단계에서 서비스 계정을 이미 생성하였으므로 생략
+  --set serviceAccount.name=aws-load-balancer-controller
+```
+
+위 명령어들이 전부 정상적으로 실행되었다면, 아래 명령어를 통해 컨트롤러가 설치되었는 지 확인하자.
+
+```bash
+$ kubectl get deployment -n kube-system aws-load-balancer-controller
+
+# 다음과 같이 출력되면 정상적으로 설치된 것이다.
+NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
+aws-load-balancer-controller   2/2     2            2           47d
+```
+
+## 2️⃣ Istio 설치
+
+[Google Cloud에서 설명하는 Istio의 정의](https://cloud.google.com/learn/what-is-istio?hl=ko)는 다음과 같다.
+
+> <i>"Istio는 애플리케이션 네트워크 기능을 유연하고 쉽게 자동화할 수 있는 투명한 언어 독립적 방법을 제공하는 현대화된 서비스 네트워킹 레이어인 서비스 메시입니다."</i>
+
+프론트엔드 개발자인 나로서는 도무지 해당 문장을 이해할 수 없었다...
+
+![](https://i.imgur.com/AtIRUmm.png)
+
+Istio가 무엇인지 정확히 이해하려면 <strong>적지 않은 시간</strong>을 써야 할 것 같다고 느꼈기에, 나는 앞의 <strong>`트래픽 흐름 이해하기`</strong> 섹션에서 istio가 어떻게 사용되었는 지를 참고하여 istio를 <u>"클러스터 외부에서 내부로 들어오는 트래픽을 관리하는 도구"</u>로 간단히 생각하기로 하였다.
+
+<Callout variant="warning">
+  더 정확한 내용은 [Istio 공식 문서](https://istio.io/latest/)에서 설명하는 내용을 참고하자...
+</Callout>
+
+클러스터에 Istio`를 설치하기 위해 나는 CLI 도구인 `istioctl`을 사용할 것이다. Homebrew로 간단히 설치할 수 있다.
+
+다음 `istioctl` 명령어를 입력하여 Istio 클러스터에 설치한다.
+
+```bash
+istioctl install --set profile=default # istio-system 네임스페이스에 설치된다.
+```
+
+<Callout variant="info">
+  <b>🤔 `profile` 속성이 의미하는 것은?</b>
+  <br />
+  <br />
+  ![](https://i.imgur.com/czXUEHb.png)
+
+  `profile` 속성을 명시함으로써 특정 istio의 구성 요소를 포함시키거나 제외하여 istio를 설치할 수 있다. istio의 주요 구성 요소 중 <u>가장 중요한 3가지</u>는 다음과 같다.
+  <br />
+
+  - `istio-egressgateway`: 클러스터 외부 -> 내부로 들어오는 트래픽 관리
+  - <strong>`istio-ingressgateway`</strong>: 클러스터 내부 -> 외부로 들어오는 트래픽 관리
+  - <strong>`istiod`</strong>: istio 핵심 구성요소
+  <br />
+  나의 클러스터가 정상 동작하려면 <strong>`istio-ingressgateway`</strong>, <strong>`istiod`</strong>가 필요하므로 `profile`을 `default`로 하여 istio를 설치한다.
+</Callout>
+
+<Callout variant="tip">
+  `istioctl`의 `profile` 관련하여 좀 더 자세한 내용은 [여기 포스트](https://kingofbackend.tistory.com/244)에서 한국인 개발자분께서 이해하기 쉽게 작성해 주셨다.
+</Callout>
+
+이때 설치된 `istio-ingressgateway`의 Type은 `Loadbalancer`인데, 이 경우 자동으로 외부 로드밸런서를 생성하게 된다. 나의 경우 앞에서 설치한 <strong>ALB가 관리하는 로드밸런서</strong>를 사용할 것이므로, `istio-ingressgateway`의 `Type`을 `NodePort`로 변경하여 <u>불필요하게 로드밸런서가 생성되지 않도록</u> 할 필요가 있다.
+
+```bash
+kubectl edit -n istio-system service istio-ingressgateway
+```
+
+위 명령어를 실행하면 `istio-ingressgateway`의 매니페스트 파일을 <strong>쓰기 모드</strong>로 열 수 있다. 아래와 같이 수정하자.
+
+```bash
+spec:
+  ...
+  type: NodePort # Loadbalancer로 되어 있을 텐데, NodePort로 수정하기
+  ...
+```
+
+## 3️⃣ ExternalDNS 배포
+
+![](https://i.imgur.com/TTEPJTf.png)
+
+<strong>ExternalDNS</strong>는 클러스터 내에서 <u>DNS 레코드를 자동으로 생성하고 업데이트</u>하는 도구이다. 이를 통해 쿠버네티스 리소스인 `Ingress` 혹은 `Service`의 IP 주소 또는 LoadBalancer 주소를 Route 53 등의 DNS 제공자에 자동으로 등록하여, <u>도메인 이름을 통해 클러스터 내 서비스에 접근</u>할 수 있게 한다.
+
+세부적인 단계는 다음과 같으며, [ExternalDNS의 공식 튜토리얼](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/aws.md)을 참고하여 진행하였다.
+
+1. IAM 정책 생성
+2. IAM 역할 생성
+3. ExternalDNS 매니페스트 작성 및 배포
+
+<Callout variant="warning">
+  <b>⚠️ 도메인 관련된 작업은 전부 완료된 상태라 가정한다.</b>
+  <br />
+  <br />
+  ![](https://i.imgur.com/7Gq7X1N.png)
+
+  나의 경우 `greenhead.blog` 도메인이 이미 Route 53에 등록되어 있고, HTTPS 통신을 위한 SSL 인증서를 ACM을 통해 생성된 상태이다.
+</Callout>
+
+### 1. IAM 정책 생성
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "route53:ChangeResourceRecordSets"
+      ],
+      "Resource": [
+        "arn:aws:route53:::hostedzone/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "route53:ListHostedZones",
+        "route53:ListResourceRecordSets",
+        "route53:ListTagsForResource"
+      ],
+      "Resource": [
+        "*"
+      ]
+    }
+  ]
+}
+```
+위 JSON 코드를 `policy.json`이라는 이름으로 저장한다. (이름은 상관없다)
+
+```bash
+aws iam create-policy --policy-name "AllowExternalDNSUpdates" --policy-document file://policy.json
+```
+
+이후 위 `aws` 명령어를 실행하여 `AllowExternalDNSUpdates`라는 이름의 IAM 정책을 생성하면 된다.
+
+### 2. IAM 역할 생성
+
+`eksctl` 명령어를 통해 <strong>IAM 역할</strong>을 생성한다.
+
+```yaml
+eksctl create iamserviceaccount \
+  --name external-dns-green-blog-co \
+  --namespace external-dns \
+  --cluster greenhead-cluster \
+  --attach-policy-arn arn:aws:iam::971490215356:policy/AllowExternalDNSUpdates \ # 전 단계에서 생성한 IAM 정책에 대한 ARN 입력
+  --approve
+```
+
+### 3. ExternalDNS 매니페스트 작성 및 배포
+
+이제 ExternalDNS 공식 문서의 ["Manifest (for cluster with RABC enalbed)"](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/istio.md#manifest-for-clusters-with-rbac-enabled)에 작성된 매니페스트 파일을 기준으로 ExternalDNS 구성을 작성하여 클러스터에 배포하면 된다.
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: external-dns-green-blog-co
+rules:
+  - apiGroups: [""]
+    resources: ["services","endpoints","pods"]
+    verbs: ["get","watch","list"]
+  - apiGroups: ["extensions","networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get","watch","list"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["list"]
+  - apiGroups: ["networking.istio.io"]
+    resources: ["gateways", "virtualservices"]
+    verbs: ["get","watch","list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: external-dns-green-blog-co
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: external-dns-green-blog-co
+subjects:
+  - kind: ServiceAccount
+    name: external-dns-green-blog-co
+    namespace: external-dns
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: external-dns-green-blog-co
+  namespace: external-dns
+spec:
+  selector:
+    matchLabels:
+      app: external-dns-green-blog-co
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: external-dns-green-blog-co
+    spec:
+      serviceAccountName: external-dns-green-blog-co
+      containers:
+        - name: external-dns-green-blog-co
+          image: registry.k8s.io/external-dns/external-dns:v0.14.0
+          args:
+            - --source=service
+            - --source=ingress
+            - --source=istio-gateway
+            - --source=istio-virtualservice
+            - --domain-filter=green-blog.co # 도메인 이름
+            - --provider=aws
+            - --policy=upsert-only
+            - --aws-zone-type=public
+            - --registry=txt
+            - --txt-owner-id=Z06833101WGBT1HIY3N6H # 호스팅 영역 ID
+```
+
+<Callout variant="info">
+  <b>📝 가장 아래 `--txt-owner-id`는 Route 53의 `호스팅 영역 ID` 값을 사용한다.</b>
+  <br />
+  <br />
+  ![](https://i.imgur.com/ch4hDFW.png)
+</Callout>
+
+작성한 `yaml` 파일을 `external-dns.yaml` 이라는 이름으로 저장하고, `kubectl` 명령어를 통해 클러스터에 배포하면 된다.
+
+```
+kubectl apply -f external-dns.yaml
+```
+
+## 4️⃣ Ingress 배포
+
+<strong>`Ingress`</strong>는 이전 포스트에서 다룬 `Deployment`, `Service와` 같은 <strong>쿠버네티스 빌트인 리소스</strong> 중 하나로, <u>쿠버네티스 외부에서 내부 서비스로의 HTTP(S) 트래픽을 라우팅</u>하는 역할을 한다.
+
+<strong>다만</strong> Ingress는 트래픽을 어떻게 라우팅할 지에 대한 규칙을 정의하기만 할 뿐, <u>실제로 트래픽을 처리하려면 <strong>Ingress Controller</strong>라는 것이 필요</u>하다. Nginx, Traefik 등 다양한 Ingress Controller가 존재한다고 하며, <u>전 단계에서 설치한 <strong>`istio-ingressgateway`</strong> 또한 Ingress Controller</u>이다.
+
+이제 Ingress 매니페스트 파일을 작성해보자.
+
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: istio-ingress-green-blog-co
+  namespace: istio-system # istiod, istio-ingressgateway가 설치된 네임스페이스로 맞추기
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing # ALB를 외부에 노출시켜 접근할 수 있도록 설정
+    alb.ingress.kubernetes.io/certificate-arn: "[green-blog.co에 대한 SSL 인증서의 ARN을 여기에 입력]"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+    alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+    external-dns.alpha.kubernetes.io/hostname: "green-blog.co" # 도메인 이름
+spec:
+  ingressClassName: alb
+  rules:
+    - http: # http는 https로 리다이렉션 되므로, http 필드만 작성한다.
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ssl-redirect
+                port:
+                  name: use-annotation
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: istio-ingressgateway
+                port:
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: istio-ingressgateway
+                port:
+                  number: 443
+```
+
+위 <strong>Ingress</strong> 매니페스트 파일은 다음과 같은 규칙을 정의하고 있다.
+
+- ALB를 인터넷에 노출시켜 외부에서 접근할 수 있도록 허용
+- `green-blog.co` 도메인에 대한 SSL 인증서를 사용하여 HTTPS를 설정
+- HTTP를 HTTPS로 리다이렉트
+- `green-blog.co` 도메인에 대한 ExternalDNS 설정 정의
+- 경로에 따라 요청을 `istio-ingressgateway` 서비스로 라우팅 (이후 다룰 `Gateway` 설정과 밀접한 관련)
+
+이 설정을 통해 외부에서 `green-blog.co` 도메인으로 들어오는 요청이 ALB를 통해 Istio Ingress Gateway로 전달되며, HTTP 요청은 HTTPS로 리다이렉트된다.
+
+
+## 5️⃣ Gateway, VirtualService 배포
+
+<strong>`Gateway`</strong>와 <strong>`VirtualService`</strong>는 `Deployment`, `Service`와 같은 쿠버네티스 빌트인 리소스가 아니라 Istio에서 제공하는 <strong>써드파티 리소스</strong>이다.
+
+각각은 다음의 역할을 수행한다.
+
+- <strong>Gateway</strong>: 외부 트래픽을 전달받아 이를 VirtualService로 전달
+- <strong>VirtualService</strong>: Gateway로부터 전달받은 트래픽을 내부 Service로 전달
+
+매니페스트 작성(배포) 순서는 `Gateway` ➡️ `VirtualService` 순이다.
+
+### 1. Gateway 매니페스트 작성 및 배포
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: green-blog-co-gateway
+  namespace: green-blog-co
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "green-blog.co"
+```
+
+위와 같이 작성 후 클러스터에 `Gateway`를 배포하면 로드 밸런서가 생성된다.
+
+![](https://i.imgur.com/hsr1tVg.png)
+
+생성된 로드 밸런서의 `DNS 이름`은 이후 VirtualService를 작성할 때 필요하다.
+
+### 2. VirtualService 매니페스트 작성 및 배포
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: green-blog-co-virtual-service
+  namespace: green-blog-co
+  annotations: # 전 단계에서 생성된 로드 밸런서의 DNS 이름을 아래 필드에 작성한다.
+    external-dns.alpha.kubernetes.io/target: "k8s-istiosys-istioing-5a5c0fc93a-784634683.ap-northeast-2.elb.amazonaws.com"
+spec:
+  hosts:
+    - "green-blog.co"
+  gateways:
+    - green-blog-co-gateway
+  http:
+    - match:
+      - uri:
+          prefix: /
+      route:
+        - destination:
+            host: green-blog-co-service
+            port:
+               number: 3000 # green-blog-co-service의 열려있는 포트 번호
+```
+
+# 끝!
+
+이를 통해 <u>웹 애플리케이션을 Github Actions + ECR + EKS를 사용하여 배포</u>한 나의 경험을 전부 정리하였다.
+
+프론트엔드 개발자가 실무에서 실제로 인프라 설정을 다루게 되는 경우도 드물 테지만, 이 경험을 통해서 <u>사내 웹 애플리케이션이 어떻게 배포되는 지에 대한 전체적인 흐름을 깊게 이해</u>할 수 있었기 때문에 배우면서 정말 즐거웠다.
+
+사실 여기서 끝내기엔 약간 아쉬운 부분은 있다. 이 정도만으로는 완전한 배포 자동화가 되지 않기 때문이다. 진정한 <strong>Push To Deploy</strong>를 구현하기 위해서는 <u>매니페스트 파일의 변경을 감지하여 이를 클러스터에 적용</u>하는 [ArgoCD](https://argo-cd.readthedocs.io/en/stable/)라는 도구도 다뤄야 하기 때문이다.
+
+ArgoCD를 다뤄본 경험은 언젠가 여유가 되면 추가로 작성해보기로 하겠다.. 🫡

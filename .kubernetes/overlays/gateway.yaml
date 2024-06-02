@@ -2,6 +2,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: green-blog-co-gateway
+  namespace: green-blog-co
 spec:
   selector:
     istio: ingressgateway

@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: green-blog-co
-          image: 971490215356.dkr.ecr.ap-northeast-2.amazonaws.com/green-blog-co
+          image: 971490215356.dkr.ecr.ap-northeast-2.amazonaws.com/greenhead-blog
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9000

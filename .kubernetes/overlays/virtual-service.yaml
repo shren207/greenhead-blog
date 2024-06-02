@@ -2,8 +2,9 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: green-blog-co-virtual-service
+  namespace: green-blog-co
   annotations:
-    external-dns.alpha.kubernetes.io/target: "k8s-istiosys-istioing-b96acd1b6c-26236385.ap-northeast-2.elb.amazonaws.com"
+    external-dns.alpha.kubernetes.io/target: "k8s-istiosys-istioing-5a5c0fc93a-835530142.ap-northeast-2.elb.amazonaws.com"
 spec:
   hosts:
     - "green-blog.co"

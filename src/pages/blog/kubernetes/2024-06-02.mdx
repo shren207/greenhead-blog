@@ -1,0 +1,83 @@
+---
+title: "[K8S] 프론트엔드 개발자의 EKS 경험기 4️⃣"
+date: 2024-06-02 13:06:12
+category: kubernetes
+thumbnail: 'k8s'
+description: ''
+draft: true
+---
+
+import Layout from '/src/templates/blog-post';
+export default Layout;
+
+![](https://i.imgur.com/WGnU0ZA.png)
+
+[지난 포스트](/blog/kubernetes/2024-04-27/)에서는 클러스터를 생성하고, 가장 기본적인 리소스 유형인 `Deployment`와 `Service`를 정의한 매니페스트 파일을 작성해보았다.
+
+이번에는 `istio`와 관련된 리소스인 `Gateway`, `VirtualService`를 포함한 나머지 작업을 전부 마무리하여, 최종적으로 배포 자동화를 달성해보자.
+
+<Callout variant="warning">
+  <b>🚨 경고, 전문성이 높지 않은 글입니다!</b>
+  <br />
+  <br />
+  실제 devOps 개발자 분들 혹은 클라우드 서비스에 일가견이 있으신 분들은 제 글을 보고 의문을 품는 부분이 한두 곳이 아니실 수 있습니다.
+  - <u>"왜 externalDNS를 사용하지?"</u>
+  - <u>"사이드카 인젝션도 모르는데 istio는 왜 사용하는 거지?"</u>
+  - <u>"vpc가 뭔지는 알고 글을 쓰는건가 이사람?"</u>
+
+  여러분들의 의견이 전부 맞습니다. 저는 <b>프론트엔드 개발자</b>이며, 단순히 회사의 k8s 인프라가 어떤 방식으로 동작하는 지 너무나도 궁금하여, 회사에서 구축한 방식을 기준으로 설명을 하는 것입니다.
+  <br />
+  제 수준에서 설명을 할 수 있는 부분(왜 spot 인스턴스를 사용했는가?)은 설명하겠지만, 너무 deep해지는 부분들(ex. istio는 무엇이며, 왜 사용하는가?)은 제 수준을 벗어나는 주제가 되어서 부득이 생략하도록 하겠습니다. 🙇
+</Callout>
+
+## 트래픽 흐름 이해하기
+
+![](https://i.imgur.com/o6AXiQh.png)
+> 이미지 출처 : [aws-eks-istio-lab](https://github.com/junglekid/aws-eks-istio-lab)
+
+위 이미지는 EKS 클러스터 내에서 트래픽이 어떻게 흐르는 지를 보여준다.
+
+1. 유저가 도메인에 접근한다.
+2. AWS DNS 서비스인 Route53이 도메인을 로드밸런서인 ALB로 라우팅한다.
+3. ALB는 트래픽을 EKS 클러스터의 `istio-ingressgateway`로 전달한다.
+4. `istio-ingressgateway`는 트래픽을 `Gateway`로 전달한다.
+5. `Gateway`는 트래픽을 `VirtualService`로 전달한다.
+6. `VirtualService`는 트래픽을 `Service`로 전달한다.
+7. `Service`는 해당 트래픽을 `Pod`로 전달한다.
+8. `Pod`는 최종적으로 사용자에게 해당 페이지를 응답한다.
+
+위와 같은 흐름으로 트래픽이 처리되도록 하기 위해, 나는 다음 순서로 작업을 진행할 것이다.
+
+1. ALB 설치
+2. istio 설치
+3. Ingress 배포
+4. Gateway, VirtualService 매니페스트 작성 및 배포
+
+## ALB 설치
+
+ALB는 AWS에서 제공하는 로드밸런서 서비스로, 클러스터 외부에서 클러스터 내부로 트래픽을 전달하는 역할을 한다.
+
+설치하는 방법은 여러가지가 있겠지만, AWS에서 초심자는 [`helm`을 사용해서 설치](https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/lbc-helm.html)하는 것을 권장하므로, 이를 따라하기로 했다.
+
+<Callout variant="tip">
+  <b>🤔 `helm`이란?</b>
+  ![](https://i.imgur.com/LfbiSE6.png)
+  <br />
+  <br />
+  Node.js에는 NPM이 있듯이, Kubernetes에는 [Helm](https://helm.sh/)이라는 **패키지 매니저**가 있다.
+  따라서 NPM의 `npm install` 명령어와 비슷하게 `helm install` 명령어로 클러스터에 필요한 의존성을 쉽게 설치할 수 있다.
+  <br />
+
+  macOS에서는 `brew install helm`으로 간단히 설치할 수 있다.
+</Callout>
+
+### 1. Service Account에 대한 IAM 역할 생성
+
+
+
+
+
+
+
+
+
